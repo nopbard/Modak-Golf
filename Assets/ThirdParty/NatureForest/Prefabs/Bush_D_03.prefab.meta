@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: c761e4ad1d9360a479f89fd009632066
+timeCreated: 1587615997
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149566
+  packageName: Nature Forest - Animation Assets
+  packageVersion: 1.1
+  assetPath: Assets/Assets/Environment/Nature Forest/Prefabs/Bush_D_03.prefab
+  uploadId: 364819

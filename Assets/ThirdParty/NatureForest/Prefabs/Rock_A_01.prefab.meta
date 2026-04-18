@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 7d6fe8334bbbb66439220e49169f5ca8
+timeCreated: 1587616011
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149566
+  packageName: Nature Forest - Animation Assets
+  packageVersion: 1.1
+  assetPath: Assets/Assets/Environment/Nature Forest/Prefabs/Rock_A_01.prefab
+  uploadId: 364819

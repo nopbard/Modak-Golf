@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e4270a629a333cf48ac29ab6f0787c83
+timeCreated: 1587615994
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149566
+  packageName: Nature Forest - Animation Assets
+  packageVersion: 1.1
+  assetPath: Assets/Assets/Environment/Nature Forest/Prefabs/Herb_C_03.prefab
+  uploadId: 364819

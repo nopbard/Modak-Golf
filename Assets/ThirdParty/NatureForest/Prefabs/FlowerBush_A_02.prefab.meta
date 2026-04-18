@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: c5ce1911a9f06e144bb356b7206a25ab
+timeCreated: 1587615996
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149566
+  packageName: Nature Forest - Animation Assets
+  packageVersion: 1.1
+  assetPath: Assets/Assets/Environment/Nature Forest/Prefabs/FlowerBush_A_02.prefab
+  uploadId: 364819

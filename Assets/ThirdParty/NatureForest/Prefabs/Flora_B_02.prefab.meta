@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 3dd5db2526b493e448d0661f392ed7fa
+timeCreated: 1587615994
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149566
+  packageName: Nature Forest - Animation Assets
+  packageVersion: 1.1
+  assetPath: Assets/Assets/Environment/Nature Forest/Prefabs/Flora_B_02.prefab
+  uploadId: 364819

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 437df1f818c257841b8d7256f2659073
+timeCreated: 1587616024
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149566
+  packageName: Nature Forest - Animation Assets
+  packageVersion: 1.1
+  assetPath: Assets/Assets/Environment/Nature Forest/Prefabs/Tree_F_02.prefab
+  uploadId: 364819

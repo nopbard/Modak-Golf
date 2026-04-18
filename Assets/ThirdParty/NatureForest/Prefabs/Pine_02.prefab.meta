@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 79d41b8256a92974a9859f4fff42fc08
+timeCreated: 1587616007
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149566
+  packageName: Nature Forest - Animation Assets
+  packageVersion: 1.1
+  assetPath: Assets/Assets/Environment/Nature Forest/Prefabs/Pine_02.prefab
+  uploadId: 364819

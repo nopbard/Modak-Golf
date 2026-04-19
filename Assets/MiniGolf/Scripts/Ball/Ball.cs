@@ -28,8 +28,35 @@ namespace MiniGolf
         [SerializeField]
         private AudioClip hitSFX;
 
+        [Tooltip("이 파워 비율 이상에서는 hitSFXStrong 재생 (0~1)")]
+        [SerializeField]
+        [Range(0.0f, 1.0f)]
+        private float strongHitPowerThreshold = 0.75f;
+
+        [Tooltip("강하게 친 경우 재생할 효과음. 비워두면 hitSFX 사용")]
+        [SerializeField]
+        private AudioClip hitSFXStrong;
+
         [SerializeField]
         private AudioClip sinkSFX;
+
+        [Header("Wall Collision")]
+        [SerializeField]
+        private AudioClip wallHitSFX;
+
+        [SerializeField]
+        private GameObject wallHitParticlePrefab;
+
+        [Tooltip("벽 충돌음 연속 재생을 막는 최소 간격(초)")]
+        [SerializeField]
+        private float wallHitCooldown = 0.15f;
+
+        [Header("OutOfBounds")]
+        [SerializeField]
+        private AudioClip outOfBoundsHitSFX;
+
+        [SerializeField]
+        private GameObject outOfBoundsHitParticlePrefab;
 
         public bool IsAiming { get; private set; }
         public float CurrentPowerPercent { get; private set; }
@@ -45,6 +72,12 @@ namespace MiniGolf
         private Vector3 lastShotPosition;
         // OOB 리스폰 코루틴 핸들 (취소용)
         private Coroutine respawnCoroutine;
+        // 벽 충돌음 연속 재생 방지용
+        private float lastWallHitTime = -10f;
+        // 첫 샷 전엔 OOB 효과음 재생 안 함 (스폰 시 OOB 트리거 오발화 방지)
+        private bool hasBeenHit;
+        // OOB 효과음/파티클을 다음 리스폰 전까지 1회만 재생하기 위한 잠금
+        private bool outOfBoundsFxPlayed;
         public State CurState { get; private set; }
         private Rigidbody rig;
         private TrailRenderer trailRenderer;
@@ -186,11 +219,16 @@ namespace MiniGolf
         {
             // 샷 직전 위치 기억 (OOB 감지 시 이 위치로 리스폰)
             lastShotPosition = transform.position;
+            hasBeenHit = true;
 
             rig.AddForce(hitForce, ForceMode.VelocityChange);
             OnHit?.Invoke();
 
-            ballAudioSource.PlayOneShot(hitSFX);
+            float powerRatio = maxHitForce > 0 ? hitForce.magnitude / maxHitForce : 0;
+            AudioClip clipToPlay = (powerRatio >= strongHitPowerThreshold && hitSFXStrong != null)
+                ? hitSFXStrong
+                : hitSFX;
+            ballAudioSource.PlayOneShot(clipToPlay);
         }
 
         // Reset the ball's position if we are off the course.
@@ -203,7 +241,9 @@ namespace MiniGolf
             {
                 if(hit.collider && hit.collider.CompareTag("OutOfBounds"))
                 {
+                    PlayOutOfBoundsFeedback(transform.position);
                     SetPosition(lastWaitingPosition);
+                    return;
                 }
             }
         }
@@ -213,7 +253,61 @@ namespace MiniGolf
         void OnCollisionEnter(Collision collision)
         {
             if(collision.collider != null && collision.collider.CompareTag("OutOfBounds"))
-                TryScheduleRespawn();
+            {
+                Vector3 fxPos = collision.contactCount > 0 ? collision.GetContact(0).point : transform.position;
+                TryScheduleRespawn(fxPos);
+            }
+        }
+
+        // 코스 프리팹은 바닥과 벽이 같은 MeshCollider라서 Enter 한 번만 발생.
+        // 벽 충돌은 Stay에서 매 프레임 contact 노멀과 접근 속도로 감지.
+        void OnCollisionStay(Collision collision)
+        {
+            if(collision.collider == null || collision.collider.CompareTag("OutOfBounds"))
+                return;
+            if(Time.time - lastWallHitTime < wallHitCooldown)
+                return;
+
+            for(int i = 0; i < collision.contactCount; i++)
+            {
+                ContactPoint contact = collision.GetContact(i);
+                if(contact.normal.y >= 0.3f)
+                    continue;
+                // 벽으로 향하는 속도 성분이 있어야 진짜 충돌. 가만히 기댄 상태에서 울리는 것 방지.
+                float approachSpeed = -Vector3.Dot(collision.relativeVelocity, contact.normal);
+                if(approachSpeed < 0.3f)
+                    continue;
+
+                if(wallHitSFX != null && ballAudioSource != null)
+                    ballAudioSource.PlayOneShot(wallHitSFX);
+
+                if(wallHitParticlePrefab != null)
+                {
+                    Quaternion rot = Quaternion.LookRotation(contact.normal);
+                    Instantiate(wallHitParticlePrefab, contact.point, rot);
+                }
+
+                lastWallHitTime = Time.time;
+                return;
+            }
+        }
+
+        // OOB 진입 시 즉시 효과음/파티클. 다음 리스폰(SetPosition) 전까지 1회만, 첫 샷 전·홀인 후에는 무시.
+        void PlayOutOfBoundsFeedback(Vector3 fxPosition)
+        {
+            if(!hasBeenHit)
+                return;
+            if(CurState == State.Sunk || (GameManager.Instance != null && GameManager.Instance.BallInHole))
+                return;
+            if(outOfBoundsFxPlayed)
+                return;
+            outOfBoundsFxPlayed = true;
+
+            if(outOfBoundsHitSFX != null && ballAudioSource != null)
+                ballAudioSource.PlayOneShot(outOfBoundsHitSFX);
+
+            if(outOfBoundsHitParticlePrefab != null)
+                Instantiate(outOfBoundsHitParticlePrefab, fxPosition, Quaternion.identity);
         }
 
         void OnCollisionExit(Collision collision)
@@ -225,7 +319,7 @@ namespace MiniGolf
         void OnTriggerEnter(Collider other)
         {
             if(other != null && other.CompareTag("OutOfBounds"))
-                TryScheduleRespawn();
+                TryScheduleRespawn(transform.position);
         }
 
         void OnTriggerExit(Collider other)
@@ -234,8 +328,11 @@ namespace MiniGolf
                 CancelRespawn();
         }
 
-        void TryScheduleRespawn()
+        void TryScheduleRespawn(Vector3 fxPosition)
         {
+            // OOB 닿는 즉시 효과음 재생 (다음 리스폰 전까지 1회 잠금은 PlayOutOfBoundsFeedback 안에서)
+            PlayOutOfBoundsFeedback(fxPosition);
+
             // 이미 예약돼 있으면 중복 트리거 무시
             if(respawnCoroutine != null)
                 return;
@@ -282,6 +379,8 @@ namespace MiniGolf
             rig.angularVelocity = Vector3.zero;
             // 새 스폰 위치를 '직전 샷 위치'로 초기화 (첫 샷 전에 OOB에 빠져도 안전)
             lastShotPosition = position;
+            // 다음 OOB부터 다시 효과음 재생되도록 잠금 해제
+            outOfBoundsFxPlayed = false;
             // 텔레포트 직후 이전 위치와 잇는 트레일 잔상 제거
             if(trailRenderer != null)
                 trailRenderer.Clear();

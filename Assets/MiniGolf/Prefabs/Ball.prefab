@@ -419,7 +419,15 @@ MonoBehaviour:
   maxHitForce: 10
   ballAudioSource: {fileID: 7161962194120800456}
   hitSFX: {fileID: 8300000, guid: 197565360c557384183bf83376db3cef, type: 3}
+  strongHitPowerThreshold: 0.8
+  hitSFXStrong: {fileID: 8300000, guid: 5dfbbf534a6cb4b2182032e098be2424, type: 3}
   sinkSFX: {fileID: 8300000, guid: ddb37508c49bb71429155387f0683a0e, type: 3}
+  wallHitSFX: {fileID: 8300000, guid: e76302ce753154066a782a96069b307e, type: 3}
+  wallHitParticlePrefab: {fileID: 0}
+  minImpactForce: 0.5
+  maxImpactForce: 8
+  outOfBoundsHitSFX: {fileID: 8300000, guid: 2aedc45f9aeba49cebf57366475c6227, type: 3}
+  outOfBoundsHitParticlePrefab: {fileID: 0}
   outOfBoundsRespawnDelay: 1
 --- !u!54 &4246559493312918470
 Rigidbody:

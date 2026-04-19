@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 50dad46822179884bbf709580c24c6b8
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Materials/BallShadow.mat
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 70511bc4cd3d9254ca8eff0cb2c9929f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Courses/Desert Course/DesertCourse_Hole1.prefab
+  uploadId: 772738

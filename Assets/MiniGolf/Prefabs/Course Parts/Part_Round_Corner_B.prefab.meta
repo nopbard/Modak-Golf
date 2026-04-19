@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 775937fd74d13474d964155e6adbc472
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Round_Corner_B.prefab
+  uploadId: 772738

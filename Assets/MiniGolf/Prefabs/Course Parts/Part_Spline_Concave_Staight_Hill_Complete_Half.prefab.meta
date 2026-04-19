@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9cb3ec2664795cb4d8d87a32b947eeea
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Spline_Concave_Staight_Hill_Complete_Half.prefab
+  uploadId: 772738

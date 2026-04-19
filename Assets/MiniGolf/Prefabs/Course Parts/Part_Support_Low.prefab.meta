@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6585c85fc8c8b5e4f8efc67ec0aa7d3c
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Support_Low.prefab
+  uploadId: 772738

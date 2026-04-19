@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 52adf2d646ccdae40953d6c9b1648f3e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Obstacle_Diamond.prefab
+  uploadId: 772738

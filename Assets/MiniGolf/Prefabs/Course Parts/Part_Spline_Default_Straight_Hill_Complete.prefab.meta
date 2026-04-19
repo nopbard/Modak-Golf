@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 043c21c52264f1d4aae177bb2f1cc0eb
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Spline_Default_Straight_Hill_Complete.prefab
+  uploadId: 772738

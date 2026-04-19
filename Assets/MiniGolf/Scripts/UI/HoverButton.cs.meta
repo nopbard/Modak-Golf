@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 4346207cf44d38a48aeb41f30fabf8e2
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scripts/UI/HoverButton.cs
+  uploadId: 772738

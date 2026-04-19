@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d8da438c1aa210e4e95ebd87c0de1f4e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Spline_Concave_Straight_Skew_Left_Side.prefab
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 06eedcb887814164dad111916e2e74a9
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Fonts/OFL.txt
+  uploadId: 772738

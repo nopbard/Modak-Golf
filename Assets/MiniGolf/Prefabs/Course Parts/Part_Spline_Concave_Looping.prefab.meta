@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f9f7e54ec1ae0d94c83094ba72277ae5
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Spline_Concave_Looping.prefab
+  uploadId: 772738

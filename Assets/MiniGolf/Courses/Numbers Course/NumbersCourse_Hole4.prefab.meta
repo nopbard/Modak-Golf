@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: eb7928ece69077948b00777c52272f99
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Courses/Numbers Course/NumbersCourse_Hole4.prefab
+  uploadId: 772738

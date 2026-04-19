@@ -6,7 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/MiniGolf/Scenes/Menu.unity
+    guid: 43edcc0417e943c4c82cad1800c0227d
+  - enabled: 1
+    path: Assets/MiniGolf/Scenes/Game_Forest.unity
+    guid: ce7c90a19e01dd142adf3dc7b55a7d97
+  - enabled: 1
+    path: Assets/MiniGolf/Scenes/Game_Desert.unity
+    guid: aa8ab9baadcf26449b1d832b508a83f5
+  - enabled: 1
+    path: Assets/MiniGolf/Scenes/Game_Snow.unity
+    guid: 78e6a26839d2ca141af07ea0a9626d77
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_UseUCBPForAssetBundles: 0

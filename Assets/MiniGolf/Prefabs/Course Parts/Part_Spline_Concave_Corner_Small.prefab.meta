@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c0c6fe7d10a2d9d41b2663a9ef8f333b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Spline_Concave_Corner_Small.prefab
+  uploadId: 772738

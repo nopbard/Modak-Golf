@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f7830a82f1be6f14e92f323d9e728276
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Obstacle_Triangle.prefab
+  uploadId: 772738

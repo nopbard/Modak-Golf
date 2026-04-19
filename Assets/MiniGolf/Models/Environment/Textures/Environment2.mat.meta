@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2c223bd294452de4d9eff372f1e0bf0b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Models/Environment/Textures/Environment2.mat
+  uploadId: 772738

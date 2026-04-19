@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 109e06a6d2ce9c8429165b5f3ddc3bcf
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Split_Walls_To_Open.prefab
+  uploadId: 772738

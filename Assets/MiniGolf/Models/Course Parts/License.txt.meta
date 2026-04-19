@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0ca178d0345e70d408d901b945af044a
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Models/Course Parts/License.txt
+  uploadId: 772738

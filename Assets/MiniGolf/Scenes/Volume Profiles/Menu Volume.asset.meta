@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a6c0f073464dacb4fb51d9a761fda126
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scenes/Volume Profiles/Menu Volume.asset
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ec3264545ff342c41b792f5c1890a0c6
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Spline_Default_Curve.prefab
+  uploadId: 772738

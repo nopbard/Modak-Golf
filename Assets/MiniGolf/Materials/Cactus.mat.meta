@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 16757da50b47c244d9d36b474447204a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Materials/Cactus.mat
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 48ca2e0c9d7c90344927b81633aeb6dd
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Flag_Red.prefab
+  uploadId: 772738

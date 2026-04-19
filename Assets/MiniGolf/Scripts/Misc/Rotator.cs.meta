@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: bd981fb2f3cd22c489528e6cec57b8f3
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scripts/Misc/Rotator.cs
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8122ef85f05b86a4ea03eeb4d60d4bba
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Environment/Snowman.prefab
+  uploadId: 772738

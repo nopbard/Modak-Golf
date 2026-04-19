@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52bdc8c240ab242499cbe6032e52bd07, type: 3}
+  m_Name: NumbersCourse
+  m_EditorClassIdentifier: 
+  DisplayName: Numbers Course
+  Difficulty: 1
+  Holes:
+  - Par: 1
+    HolePrefab: {fileID: 5194588490507158453, guid: d627381fbf9ddfc42a15df67d57d7d02, type: 3}
+  - Par: 3
+    HolePrefab: {fileID: 4216719156406985268, guid: 4c5b05ee4fde7fe469ad25eb769eea31, type: 3}
+  - Par: 3
+    HolePrefab: {fileID: 5266847972363968379, guid: cd00c08b5f401464ea8547f9aa52627c, type: 3}
+  - Par: 3
+    HolePrefab: {fileID: 2808059755795683520, guid: eb7928ece69077948b00777c52272f99, type: 3}
+  - Par: 3
+    HolePrefab: {fileID: 8253864907857379433, guid: 827219bb49156484faae4daf4c867b01, type: 3}
+  - Par: 3
+    HolePrefab: {fileID: 7835852055445726099, guid: f8ad8d779febf2a419d0fc263bfd3004, type: 3}
+  - Par: 2
+    HolePrefab: {fileID: 7228342910345763671, guid: 2924188f2cda42548b346b653ccbb2ad, type: 3}
+  - Par: 2
+    HolePrefab: {fileID: 2543031286602529993, guid: 00c5fffcd2acb56428e3629287c488d3, type: 3}
+  GameScene: Game_Snow

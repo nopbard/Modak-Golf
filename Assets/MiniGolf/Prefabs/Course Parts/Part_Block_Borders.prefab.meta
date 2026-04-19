@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 757949956e23f9c41b4a1ca4138b966d
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Block_Borders.prefab
+  uploadId: 772738

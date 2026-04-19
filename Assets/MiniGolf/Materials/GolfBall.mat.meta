@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: dd6952a61da8f3a4fbf8cc21f1bb6f8a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Materials/GolfBall.mat
+  uploadId: 772738

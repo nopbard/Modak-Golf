@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 2a97ee72e42eecf4ba3d71304d6c0722
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scripts/Ball/BallAimingIndicator.cs
+  uploadId: 772738

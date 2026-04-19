@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 01aece12dc0dd3f4199aeaae37e65a5c
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scripts/Managers/GameManager.cs
+  uploadId: 772738

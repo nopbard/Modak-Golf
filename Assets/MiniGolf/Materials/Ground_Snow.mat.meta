@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 85e4bea7e37256e42bc8f6d32749624c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Materials/Ground_Snow.mat
+  uploadId: 772738

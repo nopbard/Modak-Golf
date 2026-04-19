@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d211716f21bf52d47a540f90facf2bac
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Spline_Default_Corner_Large_Ramp.prefab
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 813a2423bb463e44a86d9abd3416d650
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Spline_Concave_Straight_Bump_Up.prefab
+  uploadId: 772738

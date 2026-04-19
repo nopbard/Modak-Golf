@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 427366f18bdf4c34a8e155a69e57196d
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/GameManager.prefab
+  uploadId: 772738

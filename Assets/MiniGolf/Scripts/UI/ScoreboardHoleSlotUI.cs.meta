@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 3cc2b39b829cf764eb2f1d88eeaf348a
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scripts/UI/ScoreboardHoleSlotUI.cs
+  uploadId: 772738

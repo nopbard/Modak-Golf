@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 789be3898c613b64e842a2b6334e8f92
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Tunnel_Wide.prefab
+  uploadId: 772738

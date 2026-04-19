@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1221fedc86ab9ea4fbe71f630fb7ecd6
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Textures/UI/license.txt
+  uploadId: 772738

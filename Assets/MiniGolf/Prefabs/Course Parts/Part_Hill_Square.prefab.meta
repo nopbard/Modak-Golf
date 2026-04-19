@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2e195d5b144814a4e9c8570264e752e8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Hill_Square.prefab
+  uploadId: 772738

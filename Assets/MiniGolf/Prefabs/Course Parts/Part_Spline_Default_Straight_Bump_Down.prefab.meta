@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e1623b577953d864ca45a535340fa69e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Spline_Default_Straight_Bump_Down.prefab
+  uploadId: 772738

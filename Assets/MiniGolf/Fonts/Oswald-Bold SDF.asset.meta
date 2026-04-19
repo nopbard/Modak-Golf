@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6491f84ef504fed4ca7aee66fe60c433
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Fonts/Oswald-Bold SDF.asset
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 146259b399754e242a3b19fa2c4a5478
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Particles/SnowParticle.prefab
+  uploadId: 772738

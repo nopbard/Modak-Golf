@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: bb8b6381261338d41b9ca13d166bc434
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Environment/Cactus.prefab
+  uploadId: 772738

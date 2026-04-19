@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 76b201ce664007a40a1f911f1e106785
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Bump_Down_Walls.prefab
+  uploadId: 772738

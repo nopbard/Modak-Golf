@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 81dc94c666ab7a64eb29e0beac4206f4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Courses/CourseList.asset
+  uploadId: 772738

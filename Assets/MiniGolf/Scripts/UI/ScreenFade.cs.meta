@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 63e053c814522ea4aa389527211b7505
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scripts/UI/ScreenFade.cs
+  uploadId: 772738

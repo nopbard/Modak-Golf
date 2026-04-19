@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 19fe543dd07ea2c4fab851274ad49de8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/HUDCanvas.prefab
+  uploadId: 772738

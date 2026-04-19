@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 97e098e1a6bc4d44f8dac5d9db6cad48
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Ramp.prefab
+  uploadId: 772738

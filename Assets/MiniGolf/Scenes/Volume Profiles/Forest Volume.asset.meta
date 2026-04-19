@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 29355cebc7e66f3429594e311754c316
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scenes/Volume Profiles/Forest Volume.asset
+  uploadId: 772738

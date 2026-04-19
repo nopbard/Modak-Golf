@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: a1249ced75f2cf346a4bf302adb8d0cc
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scripts/Ball/BallWaitingIndicator.cs
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7ef5d910325d75243b145ba421ecff90
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Obstacle_Block.prefab
+  uploadId: 772738

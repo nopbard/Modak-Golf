@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0c83df9e2219e9c48b7f4e378e352ee8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Particles/BallSinkParticle.prefab
+  uploadId: 772738

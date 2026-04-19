@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: bfce8e39b2bba8441b4d602218d4a1a3
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Scripts/Camera/CameraController.cs
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b16e77da525be7e4a9847b8032144b99
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Structure_Gate_Building.prefab
+  uploadId: 772738

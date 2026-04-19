@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1a61514d0783b1c4a8c21071e79ce8f7
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Hole_Square.prefab
+  uploadId: 772738

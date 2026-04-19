@@ -1,0 +1,11 @@
+This project contains a number of CC0 (public domain) assets from kenney.nl
+
+Particle Pack
+License: CC0
+Source: https://www.kenney.nl/assets/particle-pack
+
+Kenney 3D Models
+License: CC0
+Sources: 	https://www.kenney.nl/assets/minigolf-kit
+	https://www.kenney.nl/assets/holiday-kit
+	https://www.kenney.nl/assets/nature-kit

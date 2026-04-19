@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c6374bb7cdc848a47a4a82860647ae47
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Materials/Ground_Forest.mat
+  uploadId: 772738

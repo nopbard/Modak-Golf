@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4764f1fb976632244b67b156642852a6
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Courses/Beginner Course/BeginnerCourse_Hole6.prefab
+  uploadId: 772738

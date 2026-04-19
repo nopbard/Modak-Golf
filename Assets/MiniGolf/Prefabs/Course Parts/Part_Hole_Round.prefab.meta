@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: db768135a84625f45a403f13009a929d
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Hole_Round.prefab
+  uploadId: 772738

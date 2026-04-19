@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c6d5d134f0056bd4cbb38ed1e76f12bf
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/UI/CourseSlot.prefab
+  uploadId: 772738

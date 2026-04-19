@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7bc365ced2c2c87419798d2a8e2a90ad
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 13400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Physics Materials/Course.physicMaterial
+  uploadId: 772738

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ad350114fdd585e4bb7e14eff5cde7c4
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Prefabs/Course Parts/Part_Skew_Large_Corner.prefab
+  uploadId: 772738

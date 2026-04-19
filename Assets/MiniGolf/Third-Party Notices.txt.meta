@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 10f7d300f9d014b4fbedb967926113ac
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Third-Party Notices.txt
+  uploadId: 772738

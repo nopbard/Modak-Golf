@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using Unity.Collections;
 
@@ -34,10 +35,19 @@ namespace MiniGolf
         public float CurrentPowerPercent { get; private set; }
         public Vector3 CurrentAimDirection { get; private set; }
 
+        [Tooltip("OOB 태그에 닿은 뒤 리스폰까지 대기 시간(초)")]
+        [SerializeField]
+        private float outOfBoundsRespawnDelay = 1.0f;
+
         private float isMovingVelocityThreshold = 0.01f;
         private Vector3 lastWaitingPosition;
+        // 마지막으로 샷을 친 시점의 공 위치 (OOB 리스폰용)
+        private Vector3 lastShotPosition;
+        // OOB 리스폰 코루틴 핸들 (취소용)
+        private Coroutine respawnCoroutine;
         public State CurState { get; private set; }
         private Rigidbody rig;
+        private TrailRenderer trailRenderer;
 
         private float preWaitStartTime = 0.0f;
 
@@ -53,6 +63,7 @@ namespace MiniGolf
 
             // Get components.
             rig = GetComponent<Rigidbody>();
+            trailRenderer = GetComponent<TrailRenderer>();
         }
 
         void Start()
@@ -173,6 +184,9 @@ namespace MiniGolf
 
         public void Hit(Vector3 hitForce)
         {
+            // 샷 직전 위치 기억 (OOB 감지 시 이 위치로 리스폰)
+            lastShotPosition = transform.position;
+
             rig.AddForce(hitForce, ForceMode.VelocityChange);
             OnHit?.Invoke();
 
@@ -189,16 +203,88 @@ namespace MiniGolf
             {
                 if(hit.collider && hit.collider.CompareTag("OutOfBounds"))
                 {
-                    rig.position = lastWaitingPosition;
+                    SetPosition(lastWaitingPosition);
                 }
             }
+        }
+
+        // OOB 태그에 닿으면 outOfBoundsRespawnDelay 초 뒤 직전 샷 위치로 리스폰.
+        // 단, 그 시간 안에 OOB에서 벗어나면 예약 취소 (벽 튕김으로 스친 경우 오탐 방지).
+        void OnCollisionEnter(Collision collision)
+        {
+            if(collision.collider != null && collision.collider.CompareTag("OutOfBounds"))
+                TryScheduleRespawn();
+        }
+
+        void OnCollisionExit(Collision collision)
+        {
+            if(collision.collider != null && collision.collider.CompareTag("OutOfBounds"))
+                CancelRespawn();
+        }
+
+        void OnTriggerEnter(Collider other)
+        {
+            if(other != null && other.CompareTag("OutOfBounds"))
+                TryScheduleRespawn();
+        }
+
+        void OnTriggerExit(Collider other)
+        {
+            if(other != null && other.CompareTag("OutOfBounds"))
+                CancelRespawn();
+        }
+
+        void TryScheduleRespawn()
+        {
+            // 이미 예약돼 있으면 중복 트리거 무시
+            if(respawnCoroutine != null)
+                return;
+            respawnCoroutine = StartCoroutine(RespawnAfterDelay());
+        }
+
+        void CancelRespawn()
+        {
+            if(respawnCoroutine == null)
+                return;
+            StopCoroutine(respawnCoroutine);
+            respawnCoroutine = null;
+        }
+
+        IEnumerator RespawnAfterDelay()
+        {
+            yield return new WaitForSeconds(outOfBoundsRespawnDelay);
+            // 타이머 끝난 시점에 실제로 아직 OOB 위에 있는지 재확인.
+            // (벽 튕김으로 스쳐서 Exit 콜백이 누락되는 경우 대비)
+            if(IsCurrentlyOverOutOfBounds())
+            {
+                SetPosition(lastShotPosition);
+            }
+            respawnCoroutine = null;
+        }
+
+        bool IsCurrentlyOverOutOfBounds()
+        {
+            // 공 중심에서 아래로 raycast. OOB 태그를 먼저 만나면 OOB 위에 있는 것.
+            // 아무것도 안 맞으면 월드 밖으로 떨어진 것이므로 OOB 취급.
+            Ray ray = new Ray(transform.position, Vector3.down);
+            if(Physics.Raycast(ray, out RaycastHit hit, 50f))
+            {
+                return hit.collider != null && hit.collider.CompareTag("OutOfBounds");
+            }
+            return true;
         }
 
         public void SetPosition(Vector3 position)
         {
             rig.position = position;
+            transform.position = position;
             rig.linearVelocity = Vector3.zero;
             rig.angularVelocity = Vector3.zero;
+            // 새 스폰 위치를 '직전 샷 위치'로 초기화 (첫 샷 전에 OOB에 빠져도 안전)
+            lastShotPosition = position;
+            // 텔레포트 직후 이전 위치와 잇는 트레일 잔상 제거
+            if(trailRenderer != null)
+                trailRenderer.Clear();
         }
 
         public Vector3 GetPosition()

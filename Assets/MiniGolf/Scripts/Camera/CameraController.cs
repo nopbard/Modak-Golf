@@ -16,16 +16,26 @@ namespace MiniGolf
     public class CameraController : MonoBehaviour
     {
         [Header("줌 (FOV)")]
+        [Tooltip("기본 FOV — Bruno Simon folio-2025 기준값")]
+        [SerializeField] private float baseFov = 25f;
         [Tooltip("가장 확대된 상태의 FOV (작을수록 zoom-in)")]
-        [SerializeField] private float minZoom = 20f;
+        [SerializeField] private float minZoom = 15f;
         [Tooltip("가장 축소된 상태의 FOV (클수록 zoom-out)")]
-        [SerializeField] private float maxZoom = 35f;
+        [SerializeField] private float maxZoom = 30f;
         [Tooltip("마우스 휠 1틱 당 FOV 변화량(도)")]
         [SerializeField] private float wheelZoomSpeed = 5f;
         [Tooltip("터치 핀치 1픽셀 당 FOV 변화량(도)")]
         [SerializeField] private float pinchZoomSpeed = 0.1f;
         [Tooltip("목표 줌까지 수렴 속도 (클수록 빠름). 부드러운 줌 인/아웃 연출")]
         [SerializeField] private float zoomSmoothSpeed = 8f;
+
+        [Header("해상도 보정 (Bruno Simon 방식)")]
+        [Tooltip("기준 종횡비. 16:9 = 1.777")]
+        [SerializeField] private float idealAspect = 16f / 9f;
+        [Tooltip("비이상 비율일 때 카메라를 당기는 강도. 원본: 9")]
+        [SerializeField] private float nonIdealRatioOffset = 9f;
+        [Tooltip("해상도 보정 계산에 쓰이는 기본 카메라-타깃 거리")]
+        [SerializeField] private float baseDistance = 24f;
 
         [Header("팬 (드래그 임시 오프셋)")]
         [Tooltip("드래그 민감도 배수")]
@@ -84,13 +94,12 @@ namespace MiniGolf
 
             var lens = vcam.Lens;
             lens.ModeOverride = LensSettings.OverrideModes.Perspective;
-            lens.FieldOfView = cam.fieldOfView > 0 ? cam.fieldOfView : 25f;
-            lens.NearClipPlane = cam.nearClipPlane;
-            lens.FarClipPlane = cam.farClipPlane;
+            lens.FieldOfView = baseFov;
+            lens.NearClipPlane = 0.1f;
+            lens.FarClipPlane = 200f;
             vcam.Lens = lens;
 
-            // 초기 FOV가 클램프 범위를 벗어나면 안전하게 잘라줌 (최대치 내려갈 때 자동 수렴)
-            targetFov = Mathf.Clamp(lens.FieldOfView, minZoom, maxZoom);
+            targetFov = Mathf.Clamp(baseFov, minZoom, maxZoom);
 
             // 4. CinemachineFollow (Body) — 월드 공간 오프셋 + 댐핑
             follow = vcamGO.AddComponent<CinemachineFollow>();
@@ -138,18 +147,32 @@ namespace MiniGolf
         void ApplyZoomSmoothing()
         {
             if(vcam == null) return;
+            float effectiveFov = targetFov + ComputeResolutionFovOffset();
             var lens = vcam.Lens;
-            if(Mathf.Abs(lens.FieldOfView - targetFov) < 0.005f)
+            if(Mathf.Abs(lens.FieldOfView - effectiveFov) < 0.005f)
             {
-                if(lens.FieldOfView != targetFov)
+                if(lens.FieldOfView != effectiveFov)
                 {
-                    lens.FieldOfView = targetFov;
+                    lens.FieldOfView = effectiveFov;
                     vcam.Lens = lens;
                 }
                 return;
             }
-            lens.FieldOfView = Mathf.Lerp(lens.FieldOfView, targetFov, zoomSmoothSpeed * Time.deltaTime);
+            lens.FieldOfView = Mathf.Lerp(lens.FieldOfView, effectiveFov, zoomSmoothSpeed * Time.deltaTime);
             vcam.Lens = lens;
+        }
+
+        // 화면 비율이 idealAspect(16:9)보다 좁을수록 카메라를 뒤로 당긴 효과를 FOV로 보정.
+        // Bruno Simon folio-2025 View.js의 ratioOverflow + nonIdealRatioOffset 로직을 Unity FOV로 변환.
+        float ComputeResolutionFovOffset()
+        {
+            float currentAspect = (float)Screen.width / Screen.height;
+            float ratioOverflow = Mathf.Max(0f, idealAspect / currentAspect - 1f);
+            if(ratioOverflow < 0.0001f) return 0f;
+
+            float distMult = 1f + ratioOverflow * (nonIdealRatioOffset / baseDistance);
+            float adjustedFov = 2f * Mathf.Atan(Mathf.Tan(targetFov * 0.5f * Mathf.Deg2Rad) * distMult) * Mathf.Rad2Deg;
+            return adjustedFov - targetFov;
         }
 
         void UpdateFollowTarget()

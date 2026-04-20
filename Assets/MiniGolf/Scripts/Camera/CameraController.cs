@@ -119,7 +119,6 @@ namespace MiniGolf
             if(Ball.Instance != null && followTarget != null)
             {
                 Vector3 p = Ball.Instance.GetPosition();
-                p.y = 0f;
                 followTarget.position = p;
                 // Cinemachine에 워프 알림 → 댐핑 없이 바로 이동
                 if(vcam != null) vcam.OnTargetObjectWarped(followTarget, Vector3.zero);
@@ -183,8 +182,8 @@ namespace MiniGolf
             if(!isPanning)
                 panOffset = Vector3.Lerp(panOffset, Vector3.zero, returnSpeed * Time.deltaTime);
 
-            Vector3 target = Ball.Instance.GetPosition();
-            target.y = 0f; // 공 y 흔들림 무시 (iso 탑다운 가정)
+            Vector3 ballPos = Ball.Instance.GetPosition();
+            Vector3 target = new Vector3(ballPos.x, ballPos.y, ballPos.z);
             followTarget.position = target + panOffset;
         }
 
@@ -270,7 +269,6 @@ namespace MiniGolf
             panOffset = Vector3.zero;
             if(followTarget != null)
             {
-                pos.y = 0f;
                 followTarget.position = pos;
                 if(vcam != null) vcam.OnTargetObjectWarped(followTarget, Vector3.zero);
             }

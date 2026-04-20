@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ec87f1a05845843d3bb05b576314b62a
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282485
+  packageName: Umbra Soft Shadows - Better Directional & Contact Shadows for URP
+  packageVersion: 10.0.1
+  assetPath: Assets/UmbraSoftShadows/Runtime/Resources/Umbra/Shaders/ShadowCast.hlsl
+  uploadId: 868458

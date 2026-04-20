@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7aeef6f5814744ae3a7b75542a11ec53
+AssemblyDefinitionReferenceImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282485
+  packageName: Umbra Soft Shadows - Better Directional & Contact Shadows for URP
+  packageVersion: 10.0.1
+  assetPath: Assets/UmbraSoftShadows/Runtime/UmbraAsmRef.asmref
+  uploadId: 868458

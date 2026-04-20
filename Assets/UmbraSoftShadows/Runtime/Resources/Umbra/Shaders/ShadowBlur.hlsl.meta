@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e319766b9a5a64e008d361eaac8a7079
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282485
+  packageName: Umbra Soft Shadows - Better Directional & Contact Shadows for URP
+  packageVersion: 10.0.1
+  assetPath: Assets/UmbraSoftShadows/Runtime/Resources/Umbra/Shaders/ShadowBlur.hlsl
+  uploadId: 868458

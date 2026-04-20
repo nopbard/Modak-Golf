@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a2dfb70d5172b43e29db28656b0948e5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282485
+  packageName: Umbra Soft Shadows - Better Directional & Contact Shadows for URP
+  packageVersion: 10.0.1
+  assetPath: Assets/UmbraSoftShadows/Runtime/Resources/Umbra/Shaders/Transparent
+    Receiver/Transparent Floor.mat
+  uploadId: 868458

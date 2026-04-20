@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6c1ac87607ed940e7ac3fbd7abe0db6b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282485
+  packageName: Umbra Soft Shadows - Better Directional & Contact Shadows for URP
+  packageVersion: 10.0.1
+  assetPath: Assets/UmbraSoftShadows/Demo/Scene/URP Settings/URP-HighFidelity-Renderer.asset
+  uploadId: 868458

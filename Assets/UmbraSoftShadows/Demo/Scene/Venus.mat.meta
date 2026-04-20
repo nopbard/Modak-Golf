@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 54aca384ab99641c996e59fc0e3abd6c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282485
+  packageName: Umbra Soft Shadows - Better Directional & Contact Shadows for URP
+  packageVersion: 10.0.1
+  assetPath: Assets/UmbraSoftShadows/Demo/Scene/Venus.mat
+  uploadId: 868458

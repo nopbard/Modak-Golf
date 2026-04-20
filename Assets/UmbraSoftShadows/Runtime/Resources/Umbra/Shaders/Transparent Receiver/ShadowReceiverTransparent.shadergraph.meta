@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 2653b59b7388e4f53806f4ab964d71c8
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282485
+  packageName: Umbra Soft Shadows - Better Directional & Contact Shadows for URP
+  packageVersion: 10.0.1
+  assetPath: Assets/UmbraSoftShadows/Runtime/Resources/Umbra/Shaders/Transparent
+    Receiver/ShadowReceiverTransparent.shadergraph
+  uploadId: 868458

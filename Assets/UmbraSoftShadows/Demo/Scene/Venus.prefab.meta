@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9078fc8703eb440dbaeedb8051e96a6a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282485
+  packageName: Umbra Soft Shadows - Better Directional & Contact Shadows for URP
+  packageVersion: 10.0.1
+  assetPath: Assets/UmbraSoftShadows/Demo/Scene/Venus.prefab
+  uploadId: 868458

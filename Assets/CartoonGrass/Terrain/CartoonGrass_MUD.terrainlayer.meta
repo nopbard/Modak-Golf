@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bbcca780ac3655f4a952c87bf778d04e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 8574412962073106934
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 221724
+  packageName: Cartoon Grass and Plants
+  packageVersion: 1.02
+  assetPath: Assets/CartoonGrass/Terrain/CartoonGrass_MUD.terrainlayer
+  uploadId: 702317

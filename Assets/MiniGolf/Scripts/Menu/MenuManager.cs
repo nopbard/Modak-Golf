@@ -41,11 +41,6 @@ namespace MiniGolf
             SetScreen(coursesScreen);
         }
 
-        public void OnQuitButton()
-        {
-            Application.Quit();
-        }
-
         public void OnBackButton()
         {
             SetScreen(mainMenuScreen);

@@ -68,8 +68,8 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
-  orthographic: 1
+  field of view: 25
+  orthographic: 0
   orthographic size: 3
   m_Depth: -1
   m_CullingMask:
@@ -184,9 +184,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfce8e39b2bba8441b4d602218d4a1a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minZoom: 1
-  maxZoom: 3
-  wheelZoomSpeed: 1.5
+  minZoom: 8
+  maxZoom: 15
+  wheelZoomSpeed: 5
   pinchZoomSpeed: 0.02
   zoomSmoothSpeed: 8
   panSensitivity: 1
@@ -259,8 +259,8 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
-  orthographic: 1
+  field of view: 25
+  orthographic: 0
   orthographic size: 3
   m_Depth: 0
   m_CullingMask:

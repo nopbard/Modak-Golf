@@ -3,48 +3,110 @@ using UnityEngine.UI;
 
 namespace MiniGolf
 {
-    // Controls the line that comes out of the ball when aiming
-    // Rotate based on aim angle and lengthen based on aim power
+    // 공 조준 시 공 앞쪽(발사 방향)에 화살표를 보여준다.
+    //  - 머리는 공에서 먼 쪽(발사 방향 끝)을 향함, 꼬리 쪽(공 쪽)은 흰색 + 반투명
+    //  - 파워가 강해질수록 머리 색이 흰 → 주황 → 빨강으로 변함
+    //  - 세기에 따라 꼬리(직사각형)만 길어지고 머리는 그대로 (sprite 9-slice)
     public class BallAimingIndicator : MonoBehaviour
     {
         [SerializeField]
         private Ball ball;
 
+        [Header("Arrow")]
         [SerializeField]
-        private Image fill;
+        private Sprite arrowSprite;
 
-        private RectTransform fillRT;
-
+        [Tooltip("파워 0→1에 따른 머리 색 (0=흰, 중간=주황, 1=빨강 권장)")]
         [SerializeField]
-        private Gradient powerGradient;
+        private Gradient tipColorGradient;
 
-        private float fullHeight;
+        // 꼬리(공쪽)는 흰+반투명으로 고정. 머리에서 자연스럽게 페이드 아웃.
+        private static readonly Color tailColor = new Color(1f, 1f, 1f, 0.15f);
+
+        [Tooltip("화살표 폭(UI px)")]
+        [SerializeField]
+        private float arrowWidth = 60f;
+
+        [Tooltip("파워 0%에서의 화살표 길이(UI px). 머리만 겨우 보일 정도 권장")]
+        [SerializeField]
+        private float arrowMinLength = 100f;
+
+        [Tooltip("파워 100%에서의 화살표 길이(UI px). 길수록 꼬리가 길어짐")]
+        [SerializeField]
+        private float arrowMaxLength = 240f;
+
+        [Tooltip("공 중심에서 화살표 꼬리 끝까지 떨어진 거리(UI px)")]
+        [SerializeField]
+        private float arrowOffsetFromBall = 0f;
+
+        private RectTransform container;
+        private Image powerArrow;
+        private RectTransform powerArrowRT;
+        private UIVerticalGradient arrowGradient;
 
         void Start()
         {
             transform.parent = null;
-            fill.gameObject.SetActive(false);
+            container = (RectTransform)transform;
+            BuildPowerArrow();
+        }
 
-            fillRT = fill.GetComponent<RectTransform>();
+        void BuildPowerArrow()
+        {
+            if(arrowSprite == null) return;
 
-            fullHeight = fillRT.sizeDelta.y;
+            GameObject go = new GameObject("PowerArrow", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.transform.SetParent(container, false);
+            powerArrow = go.GetComponent<Image>();
+            powerArrow.sprite = arrowSprite;
+            powerArrow.type = Image.Type.Sliced;
+            powerArrow.fillCenter = true;
+            powerArrow.color = Color.white;
+
+            arrowGradient = go.AddComponent<UIVerticalGradient>();
+
+            powerArrowRT = (RectTransform)go.transform;
+            // 공 앞쪽(발사 방향 = 컨테이너 +Y)으로 꼬리→머리 배치:
+            //  pivot bottom, anchored y = +offset → bottom이 공 바로 앞에 위치하고 rect는 +Y로 뻗음.
+            //  sprite 머리(top)는 rect의 top = 멀리 끝 → 공 반대쪽을 향함 (= 발사 방향).
+            //  버텍스 그라디언트: top=머리=파워색, bottom=꼬리=투명 흰색.
+            powerArrowRT.anchorMin = new Vector2(0.5f, 0f);
+            powerArrowRT.anchorMax = new Vector2(0.5f, 0f);
+            powerArrowRT.pivot = new Vector2(0.5f, 0f);
+            powerArrowRT.localRotation = Quaternion.identity;
+
+            powerArrow.gameObject.SetActive(false);
         }
 
         void LateUpdate()
         {
-            fill.gameObject.SetActive(ball.IsAiming);
-
-            if(!fill.isActiveAndEnabled)
+            bool show = ball.IsAiming && ball.CurrentPowerPercent > 0.001f;
+            if(!show)
+            {
+                if(powerArrow != null)
+                    powerArrow.gameObject.SetActive(false);
                 return;
+            }
 
             float yRot = Mathf.Atan2(ball.CurrentAimDirection.z, ball.CurrentAimDirection.x) * Mathf.Rad2Deg - 90;
-
             transform.position = ball.transform.position + (ball.CurrentAimDirection * 0.05f);
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0, yRot);
 
-            fillRT.sizeDelta = new Vector2(fillRT.sizeDelta.x, fullHeight * ball.CurrentPowerPercent);
+            if(powerArrow == null) return;
 
-            fill.color = powerGradient.Evaluate(ball.CurrentPowerPercent);
+            float power = ball.CurrentPowerPercent;
+            powerArrow.gameObject.SetActive(true);
+
+            float length = Mathf.Lerp(arrowMinLength, arrowMaxLength, power);
+            powerArrowRT.anchoredPosition = new Vector2(0f, arrowOffsetFromBall);
+            powerArrowRT.sizeDelta = new Vector2(arrowWidth, length);
+
+            if(arrowGradient != null)
+            {
+                arrowGradient.topColor = tipColorGradient != null ? tipColorGradient.Evaluate(power) : Color.white;
+                arrowGradient.bottomColor = tailColor;
+                powerArrow.SetVerticesDirty();
+            }
         }
     }
 }

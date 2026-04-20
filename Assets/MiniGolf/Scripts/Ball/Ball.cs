@@ -37,6 +37,10 @@ namespace MiniGolf
         [SerializeField]
         private AudioClip hitSFXStrong;
 
+        [Tooltip("공을 칠 때 공 위치에서 생성할 파티클 프리팹 (옵션). 회전은 발사 방향에 맞춤")]
+        [SerializeField]
+        private GameObject hitParticlePrefab;
+
         [SerializeField]
         private AudioClip sinkSFX;
 
@@ -54,9 +58,6 @@ namespace MiniGolf
         [Header("OutOfBounds")]
         [SerializeField]
         private AudioClip outOfBoundsHitSFX;
-
-        [SerializeField]
-        private GameObject outOfBoundsHitParticlePrefab;
 
         public bool IsAiming { get; private set; }
         public float CurrentPowerPercent { get; private set; }
@@ -76,7 +77,7 @@ namespace MiniGolf
         private float lastWallHitTime = -10f;
         // 첫 샷 전엔 OOB 효과음 재생 안 함 (스폰 시 OOB 트리거 오발화 방지)
         private bool hasBeenHit;
-        // OOB 효과음/파티클을 다음 리스폰 전까지 1회만 재생하기 위한 잠금
+        // 같은 OOB 진입 동안 효과음 1회만 재생. SetPosition(리스폰)에서 false로 리셋.
         private bool outOfBoundsFxPlayed;
         public State CurState { get; private set; }
         private Rigidbody rig;
@@ -229,6 +230,13 @@ namespace MiniGolf
                 ? hitSFXStrong
                 : hitSFX;
             ballAudioSource.PlayOneShot(clipToPlay);
+
+            if(hitParticlePrefab != null)
+            {
+                Vector3 dir = hitForce.sqrMagnitude > 0.0001f ? hitForce.normalized : transform.forward;
+                GameObject fx = Instantiate(hitParticlePrefab, transform.position, Quaternion.LookRotation(dir));
+                Destroy(fx, 2f);
+            }
         }
 
         // Reset the ball's position if we are off the course.
@@ -284,7 +292,8 @@ namespace MiniGolf
                 if(wallHitParticlePrefab != null)
                 {
                     Quaternion rot = Quaternion.LookRotation(contact.normal);
-                    Instantiate(wallHitParticlePrefab, contact.point, rot);
+                    GameObject fx = Instantiate(wallHitParticlePrefab, contact.point, rot);
+                    Destroy(fx, 2f);
                 }
 
                 lastWallHitTime = Time.time;
@@ -292,7 +301,7 @@ namespace MiniGolf
             }
         }
 
-        // OOB 진입 시 즉시 효과음/파티클. 다음 리스폰(SetPosition) 전까지 1회만, 첫 샷 전·홀인 후에는 무시.
+        // OOB 진입 시 즉시 효과음. 첫 샷 전·홀인 후에는 무시. 다음 리스폰 전까지 1회만.
         void PlayOutOfBoundsFeedback(Vector3 fxPosition)
         {
             if(!hasBeenHit)
@@ -305,9 +314,6 @@ namespace MiniGolf
 
             if(outOfBoundsHitSFX != null && ballAudioSource != null)
                 ballAudioSource.PlayOneShot(outOfBoundsHitSFX);
-
-            if(outOfBoundsHitParticlePrefab != null)
-                Instantiate(outOfBoundsHitParticlePrefab, fxPosition, Quaternion.identity);
         }
 
         void OnCollisionExit(Collision collision)
@@ -330,7 +336,6 @@ namespace MiniGolf
 
         void TryScheduleRespawn(Vector3 fxPosition)
         {
-            // OOB 닿는 즉시 효과음 재생 (다음 리스폰 전까지 1회 잠금은 PlayOutOfBoundsFeedback 안에서)
             PlayOutOfBoundsFeedback(fxPosition);
 
             // 이미 예약돼 있으면 중복 트리거 무시
@@ -351,7 +356,6 @@ namespace MiniGolf
         {
             yield return new WaitForSeconds(outOfBoundsRespawnDelay);
             // 타이머 끝난 시점에 실제로 아직 OOB 위에 있는지 재확인.
-            // (벽 튕김으로 스쳐서 Exit 콜백이 누락되는 경우 대비)
             if(IsCurrentlyOverOutOfBounds())
             {
                 SetPosition(lastShotPosition);

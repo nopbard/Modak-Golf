@@ -10,18 +10,20 @@ namespace MiniGolf
     //
     // 동작:
     //  - 공이 움직일 때 카메라가 공을 부드럽게 추적 (Cinemachine 댐핑)
-    //  - 휠로 확대/축소 (ortho size 변경)
+    //  - 휠로 확대/축소 (FOV 변경)
     //  - 두 손가락 핀치로 확대/축소
     //  - 마우스 드래그로 일시 팬 → 버튼 떼면 부드럽게 공 위치로 복귀
     public class CameraController : MonoBehaviour
     {
-        [Header("줌 (Orthographic Size)")]
-        [SerializeField] private float minZoom = 3f;
-        [SerializeField] private float maxZoom = 5f;
-        [Tooltip("마우스 휠 1틱 당 ortho size 변화량")]
-        [SerializeField] private float wheelZoomSpeed = 1.5f;
-        [Tooltip("터치 핀치 1픽셀 당 ortho size 변화량")]
-        [SerializeField] private float pinchZoomSpeed = 0.02f;
+        [Header("줌 (FOV)")]
+        [Tooltip("가장 확대된 상태의 FOV (작을수록 zoom-in)")]
+        [SerializeField] private float minZoom = 20f;
+        [Tooltip("가장 축소된 상태의 FOV (클수록 zoom-out)")]
+        [SerializeField] private float maxZoom = 35f;
+        [Tooltip("마우스 휠 1틱 당 FOV 변화량(도)")]
+        [SerializeField] private float wheelZoomSpeed = 5f;
+        [Tooltip("터치 핀치 1픽셀 당 FOV 변화량(도)")]
+        [SerializeField] private float pinchZoomSpeed = 0.1f;
         [Tooltip("목표 줌까지 수렴 속도 (클수록 빠름). 부드러운 줌 인/아웃 연출")]
         [SerializeField] private float zoomSmoothSpeed = 8f;
 
@@ -44,7 +46,7 @@ namespace MiniGolf
         private bool isPanning;
         private Vector3 lastMouseScreen;
 
-        private float targetOrthoSize; // 입력에서 바로 갱신되는 목표 줌. 실제 lens는 이 값으로 lerp
+        private float targetFov;       // 입력에서 바로 갱신되는 목표 FOV(도). 실제 lens는 이 값으로 lerp
 
         void Awake()
         {
@@ -81,14 +83,14 @@ namespace MiniGolf
             vcam.LookAt = null; // 회전은 고정 (iso 각도 유지)
 
             var lens = vcam.Lens;
-            lens.ModeOverride = LensSettings.OverrideModes.Orthographic;
-            lens.OrthographicSize = cam.orthographicSize > 0 ? cam.orthographicSize : 6f;
+            lens.ModeOverride = LensSettings.OverrideModes.Perspective;
+            lens.FieldOfView = cam.fieldOfView > 0 ? cam.fieldOfView : 25f;
             lens.NearClipPlane = cam.nearClipPlane;
             lens.FarClipPlane = cam.farClipPlane;
             vcam.Lens = lens;
 
-            // 초기 lens size가 클램프 범위를 벗어나면 안전하게 잘라줌 (최대치 내려갈 때 자동 수렴)
-            targetOrthoSize = Mathf.Clamp(lens.OrthographicSize, minZoom, maxZoom);
+            // 초기 FOV가 클램프 범위를 벗어나면 안전하게 잘라줌 (최대치 내려갈 때 자동 수렴)
+            targetFov = Mathf.Clamp(lens.FieldOfView, minZoom, maxZoom);
 
             // 4. CinemachineFollow (Body) — 월드 공간 오프셋 + 댐핑
             follow = vcamGO.AddComponent<CinemachineFollow>();
@@ -132,21 +134,21 @@ namespace MiniGolf
             HandlePan();
         }
 
-        // 입력이 targetOrthoSize를 바꾸고, 실제 렌즈는 이 메서드에서 서서히 수렴
+        // 입력이 targetFov를 바꾸고, 실제 렌즈는 이 메서드에서 서서히 수렴
         void ApplyZoomSmoothing()
         {
             if(vcam == null) return;
             var lens = vcam.Lens;
-            if(Mathf.Abs(lens.OrthographicSize - targetOrthoSize) < 0.0005f)
+            if(Mathf.Abs(lens.FieldOfView - targetFov) < 0.005f)
             {
-                if(lens.OrthographicSize != targetOrthoSize)
+                if(lens.FieldOfView != targetFov)
                 {
-                    lens.OrthographicSize = targetOrthoSize;
+                    lens.FieldOfView = targetFov;
                     vcam.Lens = lens;
                 }
                 return;
             }
-            lens.OrthographicSize = Mathf.Lerp(lens.OrthographicSize, targetOrthoSize, zoomSmoothSpeed * Time.deltaTime);
+            lens.FieldOfView = Mathf.Lerp(lens.FieldOfView, targetFov, zoomSmoothSpeed * Time.deltaTime);
             vcam.Lens = lens;
         }
 
@@ -188,7 +190,7 @@ namespace MiniGolf
         void ApplyZoom(float delta)
         {
             // 목표값만 즉시 갱신. 실제 렌즈는 ApplyZoomSmoothing()이 lerp
-            targetOrthoSize = Mathf.Clamp(targetOrthoSize + delta, minZoom, maxZoom);
+            targetFov = Mathf.Clamp(targetFov + delta, minZoom, maxZoom);
         }
 
         void HandlePan()
@@ -213,9 +215,14 @@ namespace MiniGolf
                 Vector2 deltaPx = (Vector2)(cur - lastMouseScreen);
                 lastMouseScreen = cur;
 
-                // 픽셀 → 월드 변환. ortho: 화면 높이 = orthoSize*2 월드 유닛.
-                float worldPerPixelY = (vcam.Lens.OrthographicSize * 2f) / Screen.height;
-                float worldPerPixelX = worldPerPixelY; // ortho pixel은 x/y 동일 스케일
+                // 픽셀 → 월드 변환. perspective: 타깃 평면(공이 위치한 y=0)까지 거리 기반.
+                // 화면 높이 = 2 * distance * tan(fov/2) 월드 유닛.
+                float distance = followTarget != null
+                    ? Vector3.Distance(cam.transform.position, followTarget.position)
+                    : Vector3.Distance(cam.transform.position, Vector3.zero);
+                float fovRad = vcam.Lens.FieldOfView * Mathf.Deg2Rad;
+                float worldPerPixelY = (2f * distance * Mathf.Tan(fovRad * 0.5f)) / Screen.height;
+                float worldPerPixelX = worldPerPixelY; // aspect는 viewport 기준이라 y와 동일 스케일
 
                 // 화면 상 드래그 방향의 반대로 카메라가 움직이는 느낌 (공을 드래그해서 '당겨오는' 느낌)
                 // XZ 평면 기준. cam forward를 XZ로 평탄화.

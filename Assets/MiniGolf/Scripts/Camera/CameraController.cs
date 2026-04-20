@@ -17,7 +17,7 @@ namespace MiniGolf
     {
         [Header("줌 (FOV)")]
         [Tooltip("기본 FOV — Bruno Simon folio-2025 기준값")]
-        [SerializeField] private float baseFov = 25f;
+        [SerializeField] private float baseFov = 30f;
         [Tooltip("가장 확대된 상태의 FOV (작을수록 zoom-in)")]
         [SerializeField] private float minZoom = 15f;
         [Tooltip("가장 축소된 상태의 FOV (클수록 zoom-out)")]

@@ -27,14 +27,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1958233408168027155}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.353475, y: -0, z: -0, w: 0.935444}
-  m_LocalPosition: {x: 0, y: 15.87, z: -18}
+  m_LocalRotation: {x: 0.27144036, y: 0, z: 0, w: 0.9624553}
+  m_LocalPosition: {x: 0, y: 12.54, z: -20.46}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8403307461117875207}
   m_Father: {fileID: 2043751028558793268}
-  m_LocalEulerAnglesHint: {x: 41.4, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 31.5, y: 0, z: 0}
 --- !u!20 &4146904004923633894
 Camera:
   m_ObjectHideFlags: 0
@@ -68,7 +68,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 200
-  field of view: 25
+  field of view: 30
   orthographic: 0
   orthographic size: 3
   m_Depth: -1
@@ -184,11 +184,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfce8e39b2bba8441b4d602218d4a1a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minZoom: 8
-  maxZoom: 15
+  baseFov: 30
+  minZoom: 5
+  maxZoom: 10
   wheelZoomSpeed: 5
   pinchZoomSpeed: 0.02
   zoomSmoothSpeed: 8
+  idealAspect: 1.7777778
+  nonIdealRatioOffset: 9
+  baseDistance: 24
   panSensitivity: 1
   returnSpeed: 4
   followDamping: 1
@@ -259,7 +263,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 200
-  field of view: 25
+  field of view: 30
   orthographic: 0
   orthographic size: 3
   m_Depth: 0

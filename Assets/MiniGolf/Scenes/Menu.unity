@@ -7570,6 +7570,7 @@ GameObject:
   - component: {fileID: 579200035}
   - component: {fileID: 579200037}
   - component: {fileID: 579200036}
+  - component: {fileID: 579200038}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -7686,6 +7687,22 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &579200038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579200034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e828e348ac39438eb8ae845fe499ae5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::Umbra.UmbraSoftShadows
+  profile: {fileID: 802345539}
+  contactShadowsSource: 0
+  pointLightsTrigger: {fileID: 0}
+  debugShadows: 0
 --- !u!43 &580896033
 Mesh:
   m_ObjectHideFlags: 0
@@ -12825,6 +12842,79 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!114 &802345539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6751c6668ce8047e5bcc50f8586c1fe7, type: 3}
+  m_Name: New Umbra Profile
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::Umbra.UmbraProfile
+  shadowSource: 1
+  sampleCount: 7
+  earlyOutSamples: 32
+  lightSize: 2.5
+  enableContactHardening: 0
+  contactStrength: 0.5
+  contactStrengthKnee: 0.0001
+  distantSpread: 1
+  occludersCount: 6
+  occludersSearchRadius: 5
+  blurIterations: 0
+  blurType: 10
+  blurSpread: 1
+  blurEdgeSharpness: 0
+  blurEdgeTolerance: 5
+  blurDepthAttenStart: 50
+  blurDepthAttenLength: 50
+  blurGrazingAttenuation: 0
+  blendCascades: 0
+  posterization: 1
+  cascade1BlendingStrength: 0.1
+  cascade2BlendingStrength: 0.1
+  cascade3BlendingStrength: 0.1
+  cascade1Scale: 1
+  cascade2Scale: 1
+  cascade3Scale: 1
+  cascade4Scale: 1
+  normalsSource: 0
+  loopStepOptimization: 0
+  frameSkipOptimization: 1
+  skipFrameMaxCameraDisplacement: 1
+  skipFrameMaxCameraRotation: 5
+  downsample: 1
+  forceDepthPrepass: 0
+  preserveEdges: 1
+  style: 0
+  maskTexture: {fileID: 0}
+  maskScale: 1
+  contactShadows: 0
+  contactShadowsIntensityMultiplier: 0.85
+  contactShadowsInjectionPoint: 0
+  contactShadowsSampleCount: 16
+  contactShadowsStepping: 0.01
+  contactShadowsThicknessNear: 0.5
+  contactShadowsThicknessDistanceMultiplier: 0
+  contactShadowsJitter: 0.3
+  contactShadowsDistanceFade: 0.75
+  contactShadowsStartDistance: 0
+  contactShadowsStartDistanceFade: 0.01
+  contactShadowsNormalBias: 0.1
+  contactShadowsVignetteSize: 0.15
+  contactShadowsBias: 0.001
+  contactShadowsBiasFar: 0.4
+  contactShadowsEdgeSoftness: 0.1
+  contactShadowsSoftEdges: 0
+  contactShadowsPlanarShadows: 0
+  overlayShadows: 0
+  overlayShadowsIntensity: 0.5
+  overlayShadowsColor: {r: 0, g: 0, b: 0, a: 1}
+  transparentReceiverPlane: 0
+  receiverPlaneAltitude: 0
 --- !u!1 &808274757
 GameObject:
   m_ObjectHideFlags: 0
@@ -21222,6 +21312,10 @@ PrefabInstance:
     - target: {fileID: 4269977118422043244, guid: d3b037f35edab11438f7bb507932a941, type: 3}
       propertyPath: m_Name
       value: Tile_Golf_Green
+      objectReference: {fileID: 0}
+    - target: {fileID: 4269977118422043244, guid: d3b037f35edab11438f7bb507932a941, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -105,15 +105,18 @@ namespace MiniGolf
             // Subscribe to input events.
             InputController.Instance.OnBallTouchDown += OnBallTouchDown;
             InputController.Instance.OnBallTouchUp += OnBallTouchUp;
-            GameManager.Instance.OnBallSunk += OnBallSunk;
-            GameManager.Instance.OnLoadHole += OnLoadHole;
+            if(GameManager.Instance != null)
+            {
+                GameManager.Instance.OnBallSunk += OnBallSunk;
+                GameManager.Instance.OnLoadHole += OnLoadHole;
+            }
 
             lastWaitingPosition = transform.position;
         }
 
         void OnBallTouchDown()
         {
-            if(GameManager.Instance.BallInHole)
+            if(GameManager.Instance != null && GameManager.Instance.BallInHole)
                 return;
 
             if(CurState != State.Waiting)
@@ -127,7 +130,7 @@ namespace MiniGolf
             if(!IsAiming)
                 return;
 
-            if(GameManager.Instance.BallInHole)
+            if(GameManager.Instance != null && GameManager.Instance.BallInHole)
                 return;
 
             IsAiming = false;

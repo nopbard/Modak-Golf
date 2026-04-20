@@ -109,7 +109,8 @@ namespace MiniGolf
             tracker.PositionDamping = Vector3.one * followDamping;
             follow.TrackerSettings = tracker;
 
-            GameManager.Instance.OnLoadHole += (a, b) => OnLoadHole();
+            if(GameManager.Instance != null)
+                GameManager.Instance.OnLoadHole += (a, b) => OnLoadHole();
         }
 
         void OnLoadHole()

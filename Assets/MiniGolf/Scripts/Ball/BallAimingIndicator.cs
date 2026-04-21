@@ -20,8 +20,9 @@ namespace MiniGolf
         [SerializeField]
         private Gradient tipColorGradient;
 
-        // 꼬리(공쪽)는 흰+반투명으로 고정. 머리에서 자연스럽게 페이드 아웃.
-        private static readonly Color tailColor = new Color(1f, 1f, 1f, 0.15f);
+        [Tooltip("꼬리(공쪽) 색상. 알파를 낮출수록 공쪽에 가까워질수록 투명해짐")]
+        [SerializeField]
+        private Color tailColor = new Color(1f, 1f, 1f, 0f);
 
         [Tooltip("화살표 폭(UI px)")]
         [SerializeField]

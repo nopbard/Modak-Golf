@@ -235,7 +235,7 @@ MonoBehaviour:
   arrowSprite: {fileID: 21300000, guid: 2449f9dc9216f488da61863b34ea7c8c, type: 3}
   tipColorGradient:
     serializedVersion: 2
-    key0: {r: 1, g: 1, b: 1, a: 0.47058824}
+    key0: {r: 1, g: 1, b: 1, a: 0}
     key1: {r: 1, g: 0.95, b: 0.75, a: 1}
     key2: {r: 1, g: 0.85, b: 0.35, a: 0}
     key3: {r: 1, g: 0.65, b: 0.15, a: 0}
@@ -263,8 +263,9 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 7
     m_NumAlphaKeys: 2
+  tailColor: {r: 1, g: 1, b: 1, a: 0}
   arrowWidth: 120
-  arrowMinLength: 50
+  arrowMinLength: 30
   arrowMaxLength: 540
   arrowOffsetFromBall: 5
 --- !u!223 &1551923542314900038
@@ -710,7 +711,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: dd6952a61da8f3a4fbf8cc21f1bb6f8a, type: 2}
+  - {fileID: 2100000, guid: b82e1056173d24d179d23832acb54555, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -781,7 +782,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 50dad46822179884bbf709580c24c6b8, type: 2}
   m_DrawDistance: 1000
-  m_FadeScale: 0.9
+  m_FadeScale: 0.8
   m_StartAngleFade: 180
   m_EndAngleFade: 180
   m_UVScale: {x: 1, y: 1}
@@ -792,7 +793,7 @@ MonoBehaviour:
   m_ScaleMode: 0
   m_Offset: {x: 0, y: 0, z: 2.5}
   m_Size: {x: 0.15, y: 0.15, z: 5}
-  m_FadeFactor: 1
+  m_FadeFactor: 0.6
   m_VisibleInScene: 1
   version: 1
   m_DecalLayerMask: 2

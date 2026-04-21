@@ -229,12 +229,15 @@ namespace MiniGolf
             OnHit?.Invoke();
 
             float powerRatio = maxHitForce > 0 ? hitForce.magnitude / maxHitForce : 0;
-            AudioClip clipToPlay = (powerRatio >= strongHitPowerThreshold && hitSFXStrong != null)
+            bool isStrongHit = powerRatio >= strongHitPowerThreshold;
+
+            AudioClip clipToPlay = (isStrongHit && hitSFXStrong != null)
                 ? hitSFXStrong
                 : hitSFX;
             ballAudioSource.PlayOneShot(clipToPlay);
 
-            if(hitParticlePrefab != null)
+            // 파티클도 강타 기준과 동일하게 처리: 일정 파워 이상일 때만 생성
+            if(isStrongHit && hitParticlePrefab != null)
             {
                 Vector3 dir = hitForce.sqrMagnitude > 0.0001f ? hitForce.normalized : transform.forward;
                 GameObject fx = Instantiate(hitParticlePrefab, transform.position, Quaternion.LookRotation(dir));

@@ -110,6 +110,16 @@ namespace MiniGolf
                 GameManager.Instance.OnBallSunk += OnBallSunk;
                 GameManager.Instance.OnLoadHole += OnLoadHole;
             }
+            else
+            {
+                // GameManager가 없는 씬(Menu 등)에서는 BallStart 태그 오브젝트 위치로 스냅
+                GameObject ballStart = GameObject.FindWithTag("BallStart");
+                if(ballStart != null)
+                {
+                    SetPosition(ballStart.transform.position);
+                    ballStart.SetActive(false);
+                }
+            }
 
             lastWaitingPosition = transform.position;
         }

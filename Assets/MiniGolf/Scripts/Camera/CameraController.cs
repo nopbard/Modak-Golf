@@ -113,6 +113,17 @@ namespace MiniGolf
                 GameManager.Instance.OnLoadHole += (a, b) => OnLoadHole();
         }
 
+        void Start()
+        {
+            // Awake에서 followTarget이 rig 위치로 초기화되므로, Ball 위치로 즉시 스냅.
+            // 이걸 안 하면 첫 프레임부터 댐핑이 걸려 멀리서 줌인되는 것처럼 보임.
+            if(Ball.Instance != null && followTarget != null)
+            {
+                followTarget.position = Ball.Instance.GetPosition();
+                if(vcam != null) vcam.OnTargetObjectWarped(followTarget, Vector3.zero);
+            }
+        }
+
         void OnLoadHole()
         {
             panOffset = Vector3.zero;

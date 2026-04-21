@@ -115,7 +115,7 @@ Material:
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _AmbientMin: 0.2
+    - _AmbientMin: 0.161
     - _BaseMapPremultiply: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
@@ -173,9 +173,9 @@ Material:
     - _SelfShadingSizeExtra: 0.6
     - _ShadowEdgeSize: 0.05
     - _ShadowEdgeSizeExtra: 0.05
-    - _ShadowMidpoint: 0.359
-    - _ShadowSoftness: 0.35
-    - _ShadowStrength: 0.295
+    - _ShadowMidpoint: 0
+    - _ShadowSoftness: 0.808
+    - _ShadowStrength: 0.523
     - _Smoothness: 0.644
     - _SmoothnessTextureChannel: 0
     - _SpecularEnabled: 0

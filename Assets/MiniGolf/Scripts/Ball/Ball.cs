@@ -68,6 +68,11 @@ namespace MiniGolf
         private float outOfBoundsRespawnDelay = 1.0f;
 
         private float isMovingVelocityThreshold = 0.01f;
+
+        [Tooltip("이 속도 이하일 때 추가 감속 시작 (m/s)")]
+        [SerializeField] private float slowStopThreshold = 0.5f;
+        [Tooltip("느리게 굴러갈 때 적용할 추가 선형 감속 (높을수록 빨리 멈춤)")]
+        [SerializeField][Range(0f, 20f)] private float slowStopDrag = 4f;
         private Vector3 lastWaitingPosition;
         // 마지막으로 샷을 친 시점의 공 위치 (OOB 리스폰용)
         private Vector3 lastShotPosition;
@@ -181,6 +186,14 @@ namespace MiniGolf
             CurrentPowerPercent = Mathf.Clamp01(CurrentPowerPercent);
         }
 
+        void FixedUpdate()
+        {
+            if(CurState != State.Moving) return;
+            float speed = rig.linearVelocity.magnitude;
+            if(speed > 0f && speed < slowStopThreshold)
+                rig.linearVelocity *= Mathf.Max(0f, 1f - slowStopDrag * Time.fixedDeltaTime);
+        }
+
         void LateUpdate()
         {
             CheckState();
@@ -276,6 +289,14 @@ namespace MiniGolf
         // 단, 그 시간 안에 OOB에서 벗어나면 예약 취소 (벽 튕김으로 스친 경우 오탐 방지).
         void OnCollisionEnter(Collision collision)
         {
+            if(collision.collider != null && CollisionFXManager.Instance != null)
+            {
+                Vector3 contact = collision.contactCount > 0
+                    ? collision.GetContact(0).point
+                    : transform.position;
+                CollisionFXManager.Instance.NotifyCollision(collision.collider, contact);
+            }
+
             if(collision.collider != null && collision.collider.CompareTag("OutOfBounds"))
             {
                 Vector3 fxPos = collision.contactCount > 0 ? collision.GetContact(0).point : transform.position;

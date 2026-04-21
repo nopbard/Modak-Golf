@@ -14,5 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Courses:
   - {fileID: 11400000, guid: 87f16629bbea5364085323ac26384948, type: 2}
-  - {fileID: 11400000, guid: e7fcda9f53dc66b488dd1a663894d061, type: 2}
   - {fileID: 11400000, guid: 9519781613dd9fc41ace164b32445e30, type: 2}

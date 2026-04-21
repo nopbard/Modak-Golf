@@ -6,28 +6,25 @@ namespace MiniGolf
 {
     public class MenuManager : MonoBehaviour
     {
-        [SerializeField]
-        private GameObject mainMenuScreen;
+        [SerializeField] private GameObject mainMenuScreen;
+        [SerializeField] private GameObject playerSelectScreen;
+        [SerializeField] private GameObject coursesScreen;
 
-        [SerializeField]
-        private GameObject coursesScreen;
+        [SerializeField] private CourseSlotUI[] courseSlots;
+        [SerializeField] private CourseList courseList;
 
-        [SerializeField]
-        private CourseSlotUI[] courseSlots;
-
-        [SerializeField]
-        private CourseList courseList;
-
-        private bool loadingCourse = false;
+        private bool loadingCourse;
 
         void Start()
         {
-            // SetScreen(mainMenuScreen);
+            SetScreen(mainMenuScreen);
         }
 
+        // ── 화면 전환 ────────────────────────────────────────────────────────
         void SetScreen(GameObject screen)
         {
             mainMenuScreen.SetActive(false);
+            playerSelectScreen.SetActive(false);
             coursesScreen.SetActive(false);
 
             screen.SetActive(true);
@@ -36,16 +33,31 @@ namespace MiniGolf
                 UpdateCoursesScreen();
         }
 
-        public void OnCoursesButton()
+        // ── 버튼 콜백 ────────────────────────────────────────────────────────
+
+        // 메인 메뉴 "게임 시작" 버튼
+        public void OnStartButton()
         {
+            SetScreen(playerSelectScreen);
+        }
+
+        // 1P / 2P 선택 버튼. Inspector에서 각각 OnPlayerSelect(1), OnPlayerSelect(2) 연결
+        public void OnPlayerSelect(int playerCount)
+        {
+            PlayerPrefs.SetInt("PlayerCount", playerCount);
             SetScreen(coursesScreen);
         }
 
         public void OnBackButton()
         {
-            SetScreen(mainMenuScreen);
+            // 현재 어느 화면이냐에 따라 한 단계 뒤로
+            if(coursesScreen.activeSelf)
+                SetScreen(playerSelectScreen);
+            else
+                SetScreen(mainMenuScreen);
         }
 
+        // ── 코스 선택 화면 ───────────────────────────────────────────────────
         void UpdateCoursesScreen()
         {
             for(int i = 0; i < courseSlots.Length; i++)
@@ -66,13 +78,9 @@ namespace MiniGolf
             }
         }
 
-        // When we select a course to play, save it's index number (relative to the array on the Course List file)
-        // We save it to PlayerPrefs as we can easily access it in a new scene
-        // This could be done by having a DontDestroyOnLoad object and keeping the data there, but this is simplist method
         void PlayCourse(int courseListIndex)
         {
-            if(loadingCourse)
-                return;
+            if(loadingCourse) return;
 
             PlayerPrefs.SetInt("CourseToPlay", courseListIndex);
             loadingCourse = true;

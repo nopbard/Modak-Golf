@@ -15,7 +15,6 @@ namespace MiniGolf
         private float scaleLerpSize;
 
         private float startScale;
-
         private MeshRenderer mr;
 
         void Awake()
@@ -25,32 +24,23 @@ namespace MiniGolf
 
         void Start()
         {
-            ball.OnBeginWaiting += EnableVisual;
-            ball.OnBeginMoving += DisableVisual;
-
             startScale = transform.localScale.x;
         }
 
         void Update()
         {
-            if(InputController.Instance.IsInteractingWithBall)
-                DisableVisual();
+            // 공이 Waiting 상태이고 조준 중이 아닐 때만 표시
+            // 이벤트 기반이 아닌 상태 직접 폴링 → 연타 시 꺼진 채 유지되는 버그 방지
+            bool shouldShow = ball.CurState == Ball.State.Waiting
+                              && !InputController.Instance.IsInteractingWithBall;
 
-            if(!mr.enabled)
+            mr.enabled = shouldShow;
+
+            if(!shouldShow)
                 return;
 
             float s = Mathf.Sin(Time.time * scaleLerpSpeed) * scaleLerpSize;
             transform.localScale = Vector3.one * (s + startScale);
-        }
-
-        void EnableVisual()
-        {
-            mr.enabled = true;
-        }
-
-        void DisableVisual()
-        {
-            mr.enabled = false;
         }
     }
 }

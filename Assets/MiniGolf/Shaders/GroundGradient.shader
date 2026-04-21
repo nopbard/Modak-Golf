@@ -2,11 +2,13 @@ Shader "MiniGolf/GroundGradient"
 {
     Properties
     {
-        _ColorTop       ("Top Color",                  Color)         = (0.4, 0.8, 0.2, 1)
-        _ColorBottom    ("Bottom Color",               Color)         = (0.6, 0.45, 0.1, 1)
-        _Power          ("Gradient Power",             Range(0.1, 5)) = 1.0
-        _ShadowStrength ("Shadow Strength",            Range(0, 1))   = 0.6
-        _AmbientBoost   ("Ambient / Shadow Min Light", Range(0, 1))   = 0.3
+        _ColorTop       ("Top Color",                  Color)           = (0.4, 0.8, 0.2, 1)
+        _ColorBottom    ("Bottom Color",               Color)           = (0.6, 0.45, 0.1, 1)
+        _Power          ("Gradient Power",             Range(0.1, 5))   = 1.0
+        // 0 = 12시(위), +면 시계방향. 11시 = -30
+        _GradientAngle  ("Gradient Angle (clock deg)", Range(-180, 180)) = -30
+        _ShadowStrength ("Shadow Strength",            Range(0, 1))     = 0.6
+        _AmbientBoost   ("Ambient / Shadow Min Light", Range(0, 1))     = 0.3
     }
 
     SubShader
@@ -56,6 +58,7 @@ Shader "MiniGolf/GroundGradient"
                 half4  _ColorTop;
                 half4  _ColorBottom;
                 float  _Power;
+                float  _GradientAngle;
                 float  _ShadowStrength;
                 float  _AmbientBoost;
             CBUFFER_END
@@ -72,10 +75,17 @@ Shader "MiniGolf/GroundGradient"
 
             half4 Frag(Varyings IN) : SV_Target
             {
-                // ── 화면 공간 그라디언트 ────────────────────────────────
+                // ── 화면 공간 대각 그라디언트 ───────────────────────────
                 // fragment에서 /w: 퍼스펙티브 보정, 플랫폼 y-flip 자동 처리
-                float screenY = IN.screenPos.y / IN.screenPos.w; // 0=하단, 1=상단
-                float t       = pow(saturate(screenY), _Power);
+                float2 screenUV = IN.screenPos.xy / IN.screenPos.w; // 0..1
+                // clock angle(시계방향, 12시=0) → screen dir (x:우, y:상)
+                float angRad = radians(_GradientAngle);
+                float2 dir   = float2(-sin(angRad), cos(angRad));
+                // 중심 기준 투영 / 최대 투영 길이로 정규화 → -1..1 → 0..1
+                float proj    = dot(screenUV - 0.5, dir);
+                float maxProj = 0.5 * (abs(dir.x) + abs(dir.y));
+                float t       = saturate(proj / maxProj * 0.5 + 0.5);
+                t             = pow(t, _Power);
                 half4 color   = lerp(_ColorBottom, _ColorTop, t);
 
                 // ── 그림자 수신 ─────────────────────────────────────────

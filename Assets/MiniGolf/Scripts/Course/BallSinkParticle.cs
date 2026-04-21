@@ -14,12 +14,15 @@ namespace MiniGolf
 
         void OnEnable()
         {
-            GameManager.Instance.OnBallSunk += OnBallSunk;
+            // Menu 씬 같이 GameManager 가 없는 씬에서도 오류 안 나게 가드
+            if(GameManager.Instance != null)
+                GameManager.Instance.OnBallSunk += OnBallSunk;
         }
 
         void OnDisable()
         {
-            GameManager.Instance.OnBallSunk -= OnBallSunk;
+            if(GameManager.Instance != null)
+                GameManager.Instance.OnBallSunk -= OnBallSunk;
         }
 
         void OnBallSunk()

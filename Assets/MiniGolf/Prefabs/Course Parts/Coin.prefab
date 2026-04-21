@@ -1,0 +1,126 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &3422978739670274605
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.867
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.174
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.65
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9342429
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.35663733
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -41.788
+      objectReference: {fileID: 0}
+    - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5383770982202110359, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_Name
+      value: Coin
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5383770982202110359, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6325839930528190835}
+    - targetCorrespondingSourceObject: {fileID: 5383770982202110359, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3010075076615011784}
+  m_SourcePrefab: {fileID: 100100000, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+--- !u!1 &7293054202739467194 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5383770982202110359, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+  m_PrefabInstance: {fileID: 3422978739670274605}
+  m_PrefabAsset: {fileID: 0}
+--- !u!135 &6325839930528190835
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7293054202739467194}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.2
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3010075076615011784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7293054202739467194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dc86b49c6d374cc7999d10601724308, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MiniGolf.Coin
+  value: 1
+  idleSpin: 1
+  idleSpinSpeed: 120
+  idleBobHeight: 0.05
+  idleBobPeriod: 1.2
+  popRise: 0.8
+  popDuration: 0.4
+  popSpin: 720
+  popScale: 1.4
+  pickupSFX: {fileID: 0}
+  sfxVolume: 1

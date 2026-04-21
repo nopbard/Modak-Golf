@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using Unity.Cinemachine;
 using Unity.Cinemachine.TargetTracking;
@@ -263,6 +264,29 @@ namespace MiniGolf
         public void Zoom(float delta)
         {
             ApplyZoom(-delta * wheelZoomSpeed);
+        }
+
+        // 일정 시간 동안 damping 값을 다른 값으로 덮어쓰기 (예: 스폰 직후 부드러운 추적).
+        // 끝나면 인스펙터 기본값(followDamping) 으로 복원.
+        public void SetSmoothDamping(float damping, float duration)
+        {
+            StopCoroutine(nameof(DampingCoroutine));
+            StartCoroutine(DampingCoroutine(damping, duration));
+        }
+
+        IEnumerator DampingCoroutine(float target, float duration)
+        {
+            ApplyDamping(target);
+            yield return new WaitForSeconds(duration);
+            ApplyDamping(followDamping);
+        }
+
+        void ApplyDamping(float value)
+        {
+            if(follow == null) return;
+            var tracker = follow.TrackerSettings;
+            tracker.PositionDamping = Vector3.one * value;
+            follow.TrackerSettings = tracker;
         }
     }
 }

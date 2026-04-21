@@ -6,18 +6,22 @@ using UnityEngine;
 namespace MiniGolf.Editor
 {
     // Tools > MiniGolf > Colormap Material Replacer
-    // Step 1: FBX 임베드 머터리얼 → 외부 .mat 추출
-    // Step 2: 추출된 머터리얼 셰이더 교체
+    // Step 1: FBX/OBJ 임베드 머터리얼 → 외부 .mat 추출
+    //   - sharedMaterial ON: 첫 매칭 모델에서 1개만 추출 (OBJ 처럼 145개 모두 같은 머터리얼 공유하는 경우)
+    //   - sharedMaterial OFF: 매칭되는 모든 모델에서 각각 추출
+    // Step 2: 추출된 머터리얼 셰이더 교체 (텍스처 슬롯은 유지)
     // Step 3: 프리팹에 추출된 머터리얼 일괄 적용
+    // Step 4: 모델의 Material Remap 에 일괄 적용 (OBJ/FBX importer ExternalObjects)
     public class ColormapMaterialReplacer : EditorWindow
     {
         private Texture2D targetTexture;
         private Shader    cartoonShader;
-        private string    textureSlot    = "_BaseMap";
-        private string    searchFolder   = "Assets/MiniGolf";
-        private string    extractFolder  = "Assets/MiniGolf/Materials/Extracted";
-        private string    prefabFolder   = "Assets/MiniGolf/Prefabs/Course Parts";
-        private bool      previewOnly    = true;
+        private string    textureSlot       = "_BaseMap";
+        private string    searchFolder      = "Assets/MiniGolf";
+        private string    extractFolder     = "Assets/MiniGolf/Materials/Extracted";
+        private string    prefabFolder      = "Assets/MiniGolf/Prefabs/Course Parts";
+        private bool      previewOnly       = true;
+        private bool      sharedMaterial    = false;                    // OBJ 패키지처럼 모든 모델이 같은 머터리얼 공유할 때
         private Vector2   scroll;
         private List<string> results = new();
 
@@ -38,9 +42,13 @@ namespace MiniGolf.Editor
 
             // ── Step 1 ──────────────────────────────────────────────────
             EditorGUILayout.Space(8);
-            EditorGUILayout.LabelField("Step 1 — FBX에서 머터리얼 추출", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Step 1 — FBX/OBJ에서 머터리얼 추출", EditorStyles.boldLabel);
             searchFolder  = EditorGUILayout.TextField("Search Folder", searchFolder);
             extractFolder = EditorGUILayout.TextField("Extract To", extractFolder);
+            sharedMaterial = EditorGUILayout.Toggle(
+                new GUIContent("Shared Material",
+                    "ON이면 첫 매칭 모델에서 .mat 1개만 추출. OBJ Kenney 처럼 모든 모델이 같은 머터리얼 공유할 때 사용."),
+                sharedMaterial);
             using(new EditorGUI.DisabledScope(targetTexture == null))
             {
                 if(GUILayout.Button(previewOnly ? "Step 1: Preview" : "Step 1: Extract", GUILayout.Height(26)))
@@ -69,6 +77,19 @@ namespace MiniGolf.Editor
                     ApplyToPrefabs();
             }
 
+            // ── Step 4 ──────────────────────────────────────────────────
+            EditorGUILayout.Space(8);
+            EditorGUILayout.LabelField("Step 4 — 모델 Material Remap 적용", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "OBJ/FBX 의 ModelImporter ExternalObjects 에 추출된 머터리얼을 연결합니다.\n" +
+                "모델 자체는 수정 안 하고 importer 설정만 바뀌므로 Kenney 같은 서드파티 에셋에도 안전.",
+                MessageType.Info);
+            using(new EditorGUI.DisabledScope(targetTexture == null))
+            {
+                if(GUILayout.Button(previewOnly ? "Step 4: Preview" : "Step 4: Apply to Model Remaps", GUILayout.Height(26)))
+                    ApplyToModelRemaps();
+            }
+
             // ── 결과 로그 ────────────────────────────────────────────────
             if(results.Count > 0)
             {
@@ -89,6 +110,7 @@ namespace MiniGolf.Editor
                 Directory.CreateDirectory(extractFolder);
 
             int count = 0;
+            bool done = false;
             string[] guids = AssetDatabase.FindAssets("t:Model", new[] { searchFolder });
 
             AssetDatabase.StartAssetEditing();
@@ -96,6 +118,7 @@ namespace MiniGolf.Editor
             {
                 foreach(string guid in guids)
                 {
+                    if(done) break;
                     string fbxPath = AssetDatabase.GUIDToAssetPath(guid);
                     foreach(var asset in AssetDatabase.LoadAllAssetsAtPath(fbxPath))
                     {
@@ -108,10 +131,21 @@ namespace MiniGolf.Editor
                         string destPath = $"{extractFolder}/{mat.name}.mat";
                         results.Add($"{(previewOnly ? "[PREVIEW]" : "[EXTRACT]")} {fbxPath} → {destPath}");
                         count++;
-                        if(previewOnly) continue;
-                        if(File.Exists(destPath)) { results[^1] += " (skipped, exists)"; continue; }
-                        string err = AssetDatabase.ExtractAsset(asset, destPath);
-                        if(!string.IsNullOrEmpty(err)) results[^1] += $" ⚠ {err}";
+
+                        if(!previewOnly)
+                        {
+                            if(File.Exists(destPath))
+                            {
+                                results[^1] += " (skipped, exists)";
+                            }
+                            else
+                            {
+                                string err = AssetDatabase.ExtractAsset(asset, destPath);
+                                if(!string.IsNullOrEmpty(err)) results[^1] += $" ⚠ {err}";
+                            }
+                        }
+
+                        if(sharedMaterial) { done = true; break; }       // 첫 매칭에서 종료
                     }
                 }
             }
@@ -226,6 +260,70 @@ namespace MiniGolf.Editor
                 if(mat.name == "colormap") return mat;
             }
             return null;
+        }
+
+        // ── Step 4 ────────────────────────────────────────────────────────
+        // 각 모델의 ModelImporter.ExternalObjects 에 추출된 머터리얼을 remap.
+        // 모델 파일 자체(.obj/.fbx)는 수정 안 하므로 Kenney 같은 서드파티 에셋에 안전.
+        void ApplyToModelRemaps()
+        {
+            results.Clear();
+
+            Material extractedMat = FindExtractedMaterial();
+            if(extractedMat == null)
+            {
+                results.Add("⚠ Extract 폴더에서 colormap 머터리얼을 찾지 못했습니다. Step 1을 먼저 실행하세요.");
+                return;
+            }
+            results.Add($"사용할 머터리얼: {AssetDatabase.GetAssetPath(extractedMat)}");
+
+            int modelCount = 0, remapCount = 0;
+            string[] guids = AssetDatabase.FindAssets("t:Model", new[] { searchFolder });
+
+            AssetDatabase.StartAssetEditing();
+            try
+            {
+                foreach(string guid in guids)
+                {
+                    string modelPath = AssetDatabase.GUIDToAssetPath(guid);
+                    var importer = AssetImporter.GetAtPath(modelPath) as ModelImporter;
+                    if(importer == null) continue;
+
+                    bool modelChanged = false;
+                    foreach(var asset in AssetDatabase.LoadAllAssetsAtPath(modelPath))
+                    {
+                        if(asset is not Material m) continue;
+
+                        // 이 sub-material 이 target texture 를 쓰는지 (또는 이름이 colormap 인지) 확인
+                        bool matches = false;
+                        foreach(var slot in m.GetTexturePropertyNames())
+                            if(m.GetTexture(slot) == targetTexture) { matches = true; break; }
+                        if(!matches && m.name == "colormap") matches = true;
+                        if(!matches) continue;
+
+                        var id = new AssetImporter.SourceAssetIdentifier(typeof(Material), m.name);
+                        results.Add($"  {(previewOnly ? "[PREVIEW]" : "[REMAP]")} {modelPath} → {m.name}");
+                        remapCount++;
+                        if(previewOnly) continue;
+
+                        importer.AddRemap(id, extractedMat);
+                        modelChanged = true;
+                    }
+
+                    if(!previewOnly && modelChanged)
+                    {
+                        importer.SaveAndReimport();
+                        modelCount++;
+                    }
+                }
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+                if(!previewOnly) AssetDatabase.Refresh();
+            }
+
+            results.Add($"── {(previewOnly ? "프리뷰" : "완료")}: {modelCount}개 모델, {remapCount}개 remap ──");
         }
     }
 }

@@ -1,5 +1,52 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+# ─────────────────────────────────────────────────────────────────
+# Mobile_Renderer — 현재 Mobile quality tier + WebGL default quality 공용
+# (ProjectSettings/QualitySettings.asset 에서 WebGL → Mobile tier(index 0))
+#
+# Decal technique = 2 (Screen Space) 로 고정:
+#   - WebGL2 MRT 경로의 DBuffer(=1)는 환경에 따라 불안정할 수 있음
+#   - Screen Space 는 Depth/Normal 만 있으면 되고 브라우저 호환성이 좋음
+#
+# ─── 장기적으로 WebGL 전용 tier 로 분리해야 하는 신호들 ───
+#   · Post-processing 품질 분기 (Bloom / DoF / Color Grading / SSAO 등)
+#   · Shadow 설정 분기 (cascade 수, distance, soft shadow quality)
+#   · Additional Lights 개수 / Light Cookies 사용
+#   · MSAA / Render Scale 목표치가 모바일과 달라짐
+#   · 한쪽 플랫폼에만 필요한 RendererFeature 추가
+#     (Outline, 커스텀 FullScreen Pass, Fog, SSR 등)
+#   · Probe Volumes / APV 사용 — WebGL2 지원 제한적
+#
+# ─── 분리 절차 (위 신호가 쌓이면 수행) ───
+#   1) 이 파일 복제 → WebGL_Renderer.asset,
+#      Mobile_RPAsset 복제 → WebGL_RPAsset.asset
+#   2) WebGL_RPAsset.m_RendererDataList[0] → WebGL_Renderer 로 교체
+#   3) QualitySettings 에 새 tier 추가,
+#      excludedTargetPlatforms 를 WebGL 이외 모든 플랫폼으로 지정
+#   4) 기존 Mobile tier 의 excludedTargetPlatforms 에 WebGL 추가
+#   5) m_PerPlatformDefaultQuality.WebGL 을 새 tier 인덱스로 업데이트
+# ─────────────────────────────────────────────────────────────────
+--- !u!114 &-8421367192847538291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1614fc811f8f184697d9bee70ab9fe5, type: 3}
+  m_Name: DecalRendererFeature
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.DecalRendererFeature
+  m_Active: 1
+  m_Settings:
+    technique: 2
+    maxDrawDistance: 1000
+    decalLayers: 0
+    dBufferSettings:
+      surfaceData: 2
+    screenSpaceSettings:
+      normalBlend: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26,8 +73,9 @@ MonoBehaviour:
     probeSamplingDebugMesh: {fileID: 0}
     probeSamplingDebugTexture: {fileID: 0}
     probeVolumeBlendStatesCS: {fileID: 0}
-  m_RendererFeatures: []
-  m_RendererFeatureMap: 
+  m_RendererFeatures:
+  - {fileID: -8421367192847538291}
+  m_RendererFeatureMap:
   m_UseNativeRenderPass: 1
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   m_AssetVersion: 2

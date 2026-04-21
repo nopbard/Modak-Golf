@@ -5,7 +5,7 @@ using Unity.Collections;
 namespace MiniGolf
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class Ball : MonoBehaviour
+    public class Ball : MonoBehaviour, IBlastImmune
     {
         public enum State
         {
@@ -62,6 +62,19 @@ namespace MiniGolf
         public bool IsAiming { get; private set; }
         public float CurrentPowerPercent { get; private set; }
         public Vector3 CurrentAimDirection { get; private set; }
+
+        // 스폰 직후 "착지 전" 쿨다운. 이 동안은 WaitingIndicator / 조준 입력 모두 비활성.
+        private float settleEndTime;
+        public bool IsSettling => Time.time < settleEndTime;
+
+        // 물리적으로 공이 움직이고 있는지 (CurState 에 의존하지 않는 실시간 판정).
+        public bool IsMoving => rig != null && !rig.isKinematic && rig.linearVelocity.sqrMagnitude > 0.0001f;
+
+        // 외부(MenuSceneController 등)에서 호출. duration 초 동안 인디케이터/조준 블록.
+        public void StartSpawnSettle(float duration = 1.0f)
+        {
+            settleEndTime = Time.time + duration;
+        }
 
         [Tooltip("OOB 태그에 닿은 뒤 리스폰까지 대기 시간(초)")]
         [SerializeField]
@@ -135,6 +148,9 @@ namespace MiniGolf
                 return;
 
             if(CurState != State.Waiting)
+                return;
+
+            if(IsSettling)
                 return;
 
             IsAiming = true;

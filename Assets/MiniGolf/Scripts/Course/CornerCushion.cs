@@ -48,22 +48,18 @@ namespace MiniGolf
             var rb = collision.rigidbody;
             if(rb == null) return;
 
-            // 입사 속도 재구성 (Unity 는 OnCollisionEnter 전에 이미 bounce 를 적용하므로
-            // relativeVelocity 로 충돌 직전 상대 속도를 받음. 쿠션이 정적이라 이것이 곧 공의 입사 속도 크기)
-            Vector3 incoming = -collision.relativeVelocity;
-            float incomingSpeed = incoming.magnitude;
-            if(incomingSpeed < minImpactSpeed) return;
+            float approachSpeed = collision.relativeVelocity.magnitude;
+            if(approachSpeed < minImpactSpeed) return;
 
-            Vector3 normal = collision.GetContact(0).normal;
+            // Unity 물리엔진이 이미 PhysicsMaterial 의 bounciness 로 mirror reflection 을 적용함.
+            // (bounciness 1 이면 완벽 탄성 → 45° 빗면에서 +Z 입사가 -X 로 튕김 = 90° 꺾임)
+            // 여기서는 튕긴 뒤 속도만 부스트/최소값 보정.
+            Vector3 outVel = rb.linearVelocity;
+            float outSpeed = outVel.magnitude;
+            if(outSpeed < 0.01f) outVel = collision.GetContact(0).normal * approachSpeed;  // fallback
 
-            // 완벽 mirror 반사
-            Vector3 reflectedDir = Vector3.Reflect(incoming, normal).normalized;
-            if(reflectedDir.sqrMagnitude < 0.0001f)
-                reflectedDir = normal;                         // 극단적 엣지케이스 safe fallback
-
-            float outSpeed = Mathf.Max(incomingSpeed * speedBoost, minOutSpeed);
-            rb.linearVelocity = reflectedDir * outSpeed;
-            rb.angularVelocity = Vector3.zero;                 // 회전 초기화 (예측 가능한 튕김)
+            float targetSpeed = Mathf.Max(approachSpeed * speedBoost, minOutSpeed);
+            rb.linearVelocity = outVel.normalized * targetSpeed;
 
             PlayPunch();
 

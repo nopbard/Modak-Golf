@@ -29,11 +29,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AmbientMin: 0.151
-    - _ShadowMidpoint: 0.292
-    - _ShadowSoftness: 0.144
-    - _ShadowStrength: 0.102
+    - _AmbientMin: 0.163
+    - _ShadowMidpoint: 0.413
+    - _ShadowSoftness: 0.284
+    - _ShadowStrength: 0.223
     m_Colors:
-    - _BaseColor: {r: 0.25098038, g: 0.49640587, b: 0.78039217, a: 1}
+    - _BaseColor: {r: 0.2004717, g: 0.49838713, b: 0.8018868, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

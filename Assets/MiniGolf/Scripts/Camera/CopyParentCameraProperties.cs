@@ -19,8 +19,9 @@ namespace MiniGolf
             if(!parentCam)
                 return;
 
-            cam.fieldOfView = parentCam.fieldOfView;
-            cam.orthographic = parentCam.orthographic;
+            cam.orthographic     = parentCam.orthographic;
+            cam.orthographicSize = parentCam.orthographicSize;
+            cam.fieldOfView      = parentCam.fieldOfView;
         }
     }
 }

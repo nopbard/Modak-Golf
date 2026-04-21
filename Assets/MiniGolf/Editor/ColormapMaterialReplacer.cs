@@ -6,18 +6,20 @@ using UnityEngine;
 namespace MiniGolf.Editor
 {
     // Tools > MiniGolf > Colormap Material Replacer
-    // FBX 안에 임베드된 "colormap" 머터리얼을 외부 머터리얼로 일괄 교체.
-    // 1. Replace Material 슬롯에 카툰 머터리얼 할당
-    // 2. Search Folder 설정 (기본 Assets/)
-    // 3. "Run Replace" 클릭
+    // Step 1: FBX 임베드 머터리얼 → 외부 .mat 추출
+    // Step 2: 추출된 머터리얼 셰이더 교체
+    // Step 3: 프리팹에 추출된 머터리얼 일괄 적용
     public class ColormapMaterialReplacer : EditorWindow
     {
-        private Material replaceMaterial;
-        private string materialName   = "colormap";
-        private string searchFolder   = "Assets/MiniGolf/Models/Course Parts";
-        private bool   previewOnly    = true;
-        private Vector2 scroll;
-        private List<string> results  = new();
+        private Texture2D targetTexture;
+        private Shader    cartoonShader;
+        private string    textureSlot    = "_BaseMap";
+        private string    searchFolder   = "Assets/MiniGolf";
+        private string    extractFolder  = "Assets/MiniGolf/Materials/Extracted";
+        private string    prefabFolder   = "Assets/MiniGolf/Prefabs/Course Parts";
+        private bool      previewOnly    = true;
+        private Vector2   scroll;
+        private List<string> results = new();
 
         [MenuItem("Tools/MiniGolf/Colormap Material Replacer")]
         static void Open() => GetWindow<ColormapMaterialReplacer>("Colormap Replacer");
@@ -26,118 +28,204 @@ namespace MiniGolf.Editor
         {
             EditorGUILayout.Space(8);
             EditorGUILayout.LabelField("Colormap Material Replacer", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox(
-                "FBX 안에 임베드된 머터리얼을 외부 머터리얼로 일괄 교체합니다.\n" +
-                "같은 이름의 머터리얼은 하나의 외부 파일로 합쳐져 모든 FBX가 공유합니다.",
-                MessageType.Info);
-            EditorGUILayout.HelpBox(
-                "⚠️ Search Folder를 반드시 대상 폴더로 좁히세요.\n" +
-                "Assets 전체로 설정하면 구매한 에셋 FBX까지 리맵됩니다.",
-                MessageType.Warning);
-
-            EditorGUILayout.Space(6);
-            materialName    = EditorGUILayout.TextField("Material Name to Replace", materialName);
-            replaceMaterial = (Material)EditorGUILayout.ObjectField(
-                "Replace With (Cartoon Material)", replaceMaterial, typeof(Material), false);
-            searchFolder    = EditorGUILayout.TextField("Search Folder", searchFolder);
 
             EditorGUILayout.Space(4);
-            previewOnly = EditorGUILayout.Toggle("Preview Only (dry-run)", previewOnly);
+            previewOnly   = EditorGUILayout.Toggle("Preview Only (dry-run)", previewOnly);
+            targetTexture = (Texture2D)EditorGUILayout.ObjectField("Colormap Texture", targetTexture, typeof(Texture2D), false);
 
+            if(targetTexture == null)
+                EditorGUILayout.HelpBox("Colormap Texture를 먼저 지정하세요.", MessageType.Warning);
+
+            // ── Step 1 ──────────────────────────────────────────────────
             EditorGUILayout.Space(8);
-
-            using(new EditorGUI.DisabledScope(replaceMaterial == null && !previewOnly))
+            EditorGUILayout.LabelField("Step 1 — FBX에서 머터리얼 추출", EditorStyles.boldLabel);
+            searchFolder  = EditorGUILayout.TextField("Search Folder", searchFolder);
+            extractFolder = EditorGUILayout.TextField("Extract To", extractFolder);
+            using(new EditorGUI.DisabledScope(targetTexture == null))
             {
-                if(GUILayout.Button(previewOnly ? "Preview (no changes)" : "Run Replace", GUILayout.Height(32)))
-                    Execute();
+                if(GUILayout.Button(previewOnly ? "Step 1: Preview" : "Step 1: Extract", GUILayout.Height(26)))
+                    ExtractEmbeddedMaterials();
             }
 
-            if(replaceMaterial == null && !previewOnly)
-                EditorGUILayout.HelpBox("Replace Material을 먼저 지정하세요.", MessageType.Warning);
+            // ── Step 2 ──────────────────────────────────────────────────
+            EditorGUILayout.Space(8);
+            EditorGUILayout.LabelField("Step 2 — 셰이더 교체", EditorStyles.boldLabel);
+            cartoonShader = (Shader)EditorGUILayout.ObjectField("Cartoon Shader", cartoonShader, typeof(Shader), false);
+            textureSlot   = EditorGUILayout.TextField("Texture Slot Name", textureSlot);
+            bool canStep2 = targetTexture != null && (previewOnly || cartoonShader != null);
+            using(new EditorGUI.DisabledScope(!canStep2))
+            {
+                if(GUILayout.Button(previewOnly ? "Step 2: Preview" : "Step 2: Replace Shader", GUILayout.Height(26)))
+                    ReplaceShader();
+            }
 
+            // ── Step 3 ──────────────────────────────────────────────────
+            EditorGUILayout.Space(8);
+            EditorGUILayout.LabelField("Step 3 — 프리팹에 머터리얼 적용", EditorStyles.boldLabel);
+            prefabFolder  = EditorGUILayout.TextField("Prefab Folder", prefabFolder);
+            using(new EditorGUI.DisabledScope(targetTexture == null))
+            {
+                if(GUILayout.Button(previewOnly ? "Step 3: Preview" : "Step 3: Apply to Prefabs", GUILayout.Height(26)))
+                    ApplyToPrefabs();
+            }
+
+            // ── 결과 로그 ────────────────────────────────────────────────
             if(results.Count > 0)
             {
                 EditorGUILayout.Space(6);
-                EditorGUILayout.LabelField($"결과 ({results.Count}개 FBX)", EditorStyles.boldLabel);
-                scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.MaxHeight(300));
+                EditorGUILayout.LabelField("결과", EditorStyles.boldLabel);
+                scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.MaxHeight(250));
                 foreach(var line in results)
                     EditorGUILayout.LabelField(line, EditorStyles.miniLabel);
                 EditorGUILayout.EndScrollView();
             }
         }
 
-        void Execute()
+        // ── Step 1 ────────────────────────────────────────────────────────
+        void ExtractEmbeddedMaterials()
         {
             results.Clear();
+            if(!previewOnly)
+                Directory.CreateDirectory(extractFolder);
 
-            // 검색 폴더 안 모든 FBX 찾기
+            int count = 0;
             string[] guids = AssetDatabase.FindAssets("t:Model", new[] { searchFolder });
-            int changed = 0;
 
             AssetDatabase.StartAssetEditing();
             try
             {
                 foreach(string guid in guids)
                 {
-                    string path = AssetDatabase.GUIDToAssetPath(guid);
-                    var importer = AssetImporter.GetAtPath(path) as ModelImporter;
-                    if(importer == null) continue;
-
-                    // 이 FBX 안에 대상 머터리얼이 있는지 확인
-                    var remap = importer.GetExternalObjectMap();
-                    bool found = false;
-
-                    // 임베드된 오브젝트 목록에서 머터리얼 이름 검색
-                    foreach(var asset in AssetDatabase.LoadAllAssetsAtPath(path))
+                    string fbxPath = AssetDatabase.GUIDToAssetPath(guid);
+                    foreach(var asset in AssetDatabase.LoadAllAssetsAtPath(fbxPath))
                     {
-                        if(asset is Material mat && mat.name == materialName)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
+                        if(asset is not Material mat) continue;
+                        bool uses = false;
+                        foreach(var slot in mat.GetTexturePropertyNames())
+                            if(mat.GetTexture(slot) == targetTexture) { uses = true; break; }
+                        if(!uses) continue;
 
-                    // External remap에 이미 등록된 경우도 확인
-                    if(!found)
-                    {
-                        foreach(var kv in remap)
-                        {
-                            if(kv.Key.type == typeof(Material) && kv.Key.name == materialName)
-                            {
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if(!found) continue;
-
-                    results.Add($"{(previewOnly ? "[PREVIEW]" : "[CHANGED]")} {path}");
-                    changed++;
-
-                    if(!previewOnly && replaceMaterial != null)
-                    {
-                        var id = new AssetImporter.SourceAssetIdentifier(typeof(Material), materialName);
-                        importer.AddRemap(id, replaceMaterial);
-                        importer.SaveAndReimport();
+                        string destPath = $"{extractFolder}/{mat.name}.mat";
+                        results.Add($"{(previewOnly ? "[PREVIEW]" : "[EXTRACT]")} {fbxPath} → {destPath}");
+                        count++;
+                        if(previewOnly) continue;
+                        if(File.Exists(destPath)) { results[^1] += " (skipped, exists)"; continue; }
+                        string err = AssetDatabase.ExtractAsset(asset, destPath);
+                        if(!string.IsNullOrEmpty(err)) results[^1] += $" ⚠ {err}";
                     }
                 }
             }
             finally
             {
                 AssetDatabase.StopAssetEditing();
+                if(!previewOnly) AssetDatabase.Refresh();
+            }
+            results.Add($"── {(previewOnly ? "프리뷰" : "완료")}: {count}개 ──");
+        }
+
+        // ── Step 2 ────────────────────────────────────────────────────────
+        void ReplaceShader()
+        {
+            results.Clear();
+            int count = 0;
+            string[] guids = AssetDatabase.FindAssets("t:Material", new[] { extractFolder, searchFolder });
+            foreach(string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+                if(mat == null) continue;
+                bool uses = false;
+                foreach(var slot in mat.GetTexturePropertyNames())
+                    if(mat.GetTexture(slot) == targetTexture) { uses = true; break; }
+                if(!uses) continue;
+
+                results.Add($"{(previewOnly ? "[PREVIEW]" : "[CHANGED]")} {path} ({mat.shader.name})");
+                count++;
+                if(previewOnly || cartoonShader == null) continue;
+
+                Undo.RecordObject(mat, "Replace Cartoon Shader");
+                mat.shader = cartoonShader;
+                if(mat.HasProperty(textureSlot))
+                    mat.SetTexture(textureSlot, targetTexture);
+                EditorUtility.SetDirty(mat);
+            }
+            if(!previewOnly) AssetDatabase.SaveAssets();
+            results.Add($"── {(previewOnly ? "프리뷰" : "완료")}: {count}개 ──");
+        }
+
+        // ── Step 3 ────────────────────────────────────────────────────────
+        void ApplyToPrefabs()
+        {
+            results.Clear();
+
+            // Extract 폴더에서 colormap 텍스처를 쓰는 추출된 머터리얼 찾기
+            Material extractedMat = FindExtractedMaterial();
+            if(extractedMat == null)
+            {
+                results.Add("⚠ Extract 폴더에서 colormap 머터리얼을 찾지 못했습니다. Step 1을 먼저 실행하세요.");
+                return;
+            }
+            results.Add($"사용할 머터리얼: {AssetDatabase.GetAssetPath(extractedMat)}");
+
+            int prefabCount = 0, rendererCount = 0;
+            string[] guids = AssetDatabase.FindAssets("t:Prefab", new[] { prefabFolder });
+
+            foreach(string guid in guids)
+            {
+                string prefabPath = AssetDatabase.GUIDToAssetPath(guid);
+
+                // PrefabUtility로 prefab contents를 임시 로드
+                var contents = PrefabUtility.LoadPrefabContents(prefabPath);
+                bool changed = false;
+
+                foreach(var renderer in contents.GetComponentsInChildren<Renderer>(true))
+                {
+                    var mats = renderer.sharedMaterials;
+                    for(int i = 0; i < mats.Length; i++)
+                    {
+                        if(mats[i] == null) continue;
+                        bool isColormap = mats[i].name == "colormap";
+                        if(!isColormap)
+                        {
+                            foreach(var slot in mats[i].GetTexturePropertyNames())
+                                if(mats[i].GetTexture(slot) == targetTexture) { isColormap = true; break; }
+                        }
+                        if(!isColormap) continue;
+
+                        results.Add($"  {(previewOnly ? "[PREVIEW]" : "[APPLY]")} {prefabPath} → {renderer.name} [slot {i}]");
+                        rendererCount++;
+                        if(!previewOnly) mats[i] = extractedMat;
+                        changed = true;
+                    }
+                    if(!previewOnly && changed)
+                        renderer.sharedMaterials = mats;
+                }
+
+                if(!previewOnly && changed)
+                {
+                    PrefabUtility.SaveAsPrefabAsset(contents, prefabPath);
+                    prefabCount++;
+                }
+                PrefabUtility.UnloadPrefabContents(contents);
             }
 
-            if(!previewOnly)
+            results.Add($"── {(previewOnly ? "프리뷰" : "완료")}: {prefabCount}개 프리팹, {rendererCount}개 렌더러 ──");
+            if(!previewOnly) AssetDatabase.Refresh();
+        }
+
+        Material FindExtractedMaterial()
+        {
+            string[] guids = AssetDatabase.FindAssets("t:Material", new[] { extractFolder });
+            foreach(string guid in guids)
             {
-                AssetDatabase.Refresh();
-                results.Add($"── 완료: {changed}개 FBX 교체됨 ──");
-                Debug.Log($"[ColormapReplacer] {changed}개 FBX의 '{materialName}' 머터리얼을 '{replaceMaterial?.name}'으로 교체 완료.");
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+                if(mat == null) continue;
+                foreach(var slot in mat.GetTexturePropertyNames())
+                    if(mat.GetTexture(slot) == targetTexture) return mat;
+                if(mat.name == "colormap") return mat;
             }
-            else
-            {
-                results.Add($"── 프리뷰: {changed}개 FBX에서 '{materialName}' 발견 ──");
-            }
+            return null;
         }
     }
 }

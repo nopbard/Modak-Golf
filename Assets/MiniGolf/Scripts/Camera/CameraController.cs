@@ -10,29 +10,29 @@ namespace MiniGolf
     //
     // 동작:
     //  - 공이 움직일 때 카메라가 공을 부드럽게 추적 (Cinemachine 댐핑)
-    //  - 휠로 확대/축소 (FOV 변경)
+    //  - 휠로 확대/축소 (Orthographic Size 변경)
     //  - 두 손가락 핀치로 확대/축소
     //  - 마우스 드래그로 일시 팬 → 버튼 떼면 부드럽게 공 위치로 복귀
     public class CameraController : MonoBehaviour
     {
-        [Header("줌 (FOV)")]
-        [Tooltip("기본 FOV — Bruno Simon folio-2025 기준값")]
-        [SerializeField] private float baseFov = 30f;
-        [Tooltip("가장 확대된 상태의 FOV (작을수록 zoom-in)")]
-        [SerializeField] private float minZoom = 15f;
-        [Tooltip("가장 축소된 상태의 FOV (클수록 zoom-out)")]
-        [SerializeField] private float maxZoom = 30f;
-        [Tooltip("마우스 휠 1틱 당 FOV 변화량(도)")]
-        [SerializeField] private float wheelZoomSpeed = 5f;
-        [Tooltip("터치 핀치 1픽셀 당 FOV 변화량(도)")]
-        [SerializeField] private float pinchZoomSpeed = 0.1f;
-        [Tooltip("목표 줌까지 수렴 속도 (클수록 빠름). 부드러운 줌 인/아웃 연출")]
+        [Header("줌 (Ortho Size)")]
+        [Tooltip("기본 Orthographic Size")]
+        [SerializeField] private float baseOrthoSize = 6.5f;
+        [Tooltip("가장 확대된 상태의 Ortho Size (작을수록 zoom-in)")]
+        [SerializeField] private float minOrthoSize = 3f;
+        [Tooltip("가장 축소된 상태의 Ortho Size (클수록 zoom-out)")]
+        [SerializeField] private float maxOrthoSize = 10f;
+        [Tooltip("마우스 휠 1틱 당 Ortho Size 변화량")]
+        [SerializeField] private float wheelZoomSpeed = 0.5f;
+        [Tooltip("터치 핀치 1픽셀 당 Ortho Size 변화량")]
+        [SerializeField] private float pinchZoomSpeed = 0.01f;
+        [Tooltip("목표 줌까지 수렴 속도 (클수록 빠름)")]
         [SerializeField] private float zoomSmoothSpeed = 8f;
 
-        [Header("해상도 보정 (Bruno Simon 방식)")]
+        [Header("해상도 보정")]
         [Tooltip("기준 종횡비. 16:9 = 1.777")]
         [SerializeField] private float idealAspect = 16f / 9f;
-        [Tooltip("비이상 비율일 때 카메라를 당기는 강도. 원본: 9")]
+        [Tooltip("비이상 비율일 때 Ortho Size를 늘리는 강도")]
         [SerializeField] private float nonIdealRatioOffset = 9f;
         [Tooltip("해상도 보정 계산에 쓰이는 기본 카메라-타깃 거리")]
         [SerializeField] private float baseDistance = 24f;
@@ -52,11 +52,12 @@ namespace MiniGolf
         private CinemachineFollow follow;
         private Transform followTarget;
 
-        private Vector3 panOffset;     // 누적된 팬 오프셋 (공 기준 월드 델타)
+        private Vector3 panOffset;
         private bool isPanning;
         private Vector3 lastMouseScreen;
 
-        private float targetFov;       // 입력에서 바로 갱신되는 목표 FOV(도). 실제 lens는 이 값으로 lerp
+        // 입력에서 바로 갱신되는 목표 Ortho Size. 실제 lens는 이 값으로 lerp
+        private float targetOrthoSize;
 
         void Awake()
         {
@@ -67,22 +68,20 @@ namespace MiniGolf
                 return;
             }
 
-            // 기존 scene에서 세팅된 camera의 world 위치/회전 캡처 (Cinemachine 인계 전)
             Vector3 initialCamWorldPos = cam.transform.position;
             Quaternion initialCamWorldRot = cam.transform.rotation;
-            // rig 기준 카메라 로컬 오프셋 (공 → 카메라 월드 벡터)
             Vector3 rigToCameraOffset = initialCamWorldPos - transform.position;
 
             // 1. Main Camera에 CinemachineBrain
             if(cam.GetComponent<CinemachineBrain>() == null)
                 cam.gameObject.AddComponent<CinemachineBrain>();
 
-            // 2. Follow Target (공을 따라다닐 빈 GO)
+            // 2. Follow Target
             var targetGO = new GameObject("CameraFollowTarget");
             targetGO.transform.SetParent(transform, false);
             followTarget = targetGO.transform;
 
-            // 3. CinemachineCamera (vcam)
+            // 3. CinemachineCamera (vcam) — Orthographic 모드
             var vcamGO = new GameObject("BallVCam");
             vcamGO.transform.SetParent(transform, false);
             vcamGO.transform.position = initialCamWorldPos;
@@ -90,18 +89,18 @@ namespace MiniGolf
 
             vcam = vcamGO.AddComponent<CinemachineCamera>();
             vcam.Follow = followTarget;
-            vcam.LookAt = null; // 회전은 고정 (iso 각도 유지)
+            vcam.LookAt = null;
 
             var lens = vcam.Lens;
-            lens.ModeOverride = LensSettings.OverrideModes.Perspective;
-            lens.FieldOfView = baseFov;
+            lens.ModeOverride = LensSettings.OverrideModes.Orthographic;
+            lens.OrthographicSize = baseOrthoSize;
             lens.NearClipPlane = 0.1f;
             lens.FarClipPlane = 200f;
             vcam.Lens = lens;
 
-            targetFov = Mathf.Clamp(baseFov, minZoom, maxZoom);
+            targetOrthoSize = Mathf.Clamp(baseOrthoSize, minOrthoSize, maxOrthoSize);
 
-            // 4. CinemachineFollow (Body) — 월드 공간 오프셋 + 댐핑
+            // 4. CinemachineFollow (Body)
             follow = vcamGO.AddComponent<CinemachineFollow>();
             follow.FollowOffset = rigToCameraOffset;
             var tracker = follow.TrackerSettings;
@@ -115,8 +114,6 @@ namespace MiniGolf
 
         void Start()
         {
-            // Awake에서 followTarget이 rig 위치로 초기화되므로, Ball 위치로 즉시 스냅.
-            // 이걸 안 하면 첫 프레임부터 댐핑이 걸려 멀리서 줌인되는 것처럼 보임.
             if(Ball.Instance != null && followTarget != null)
             {
                 followTarget.position = Ball.Instance.GetPosition();
@@ -127,12 +124,10 @@ namespace MiniGolf
         void OnLoadHole()
         {
             panOffset = Vector3.zero;
-            // 새 홀 시작 시 카메라가 튀지 않도록 즉시 공 위치로 타깃 스냅
             if(Ball.Instance != null && followTarget != null)
             {
                 Vector3 p = Ball.Instance.GetPosition();
                 followTarget.position = p;
-                // Cinemachine에 워프 알림 → 댐핑 없이 바로 이동
                 if(vcam != null) vcam.OnTargetObjectWarped(followTarget, Vector3.zero);
             }
         }
@@ -142,7 +137,6 @@ namespace MiniGolf
             UpdateFollowTarget();
             ApplyZoomSmoothing();
 
-            // 공 조준 중이면 카메라 조작 입력 차단
             bool interactingWithBall = InputController.Instance != null && InputController.Instance.IsInteractingWithBall;
             if(interactingWithBall)
             {
@@ -154,59 +148,50 @@ namespace MiniGolf
             HandlePan();
         }
 
-        // 입력이 targetFov를 바꾸고, 실제 렌즈는 이 메서드에서 서서히 수렴
         void ApplyZoomSmoothing()
         {
             if(vcam == null) return;
-            float effectiveFov = targetFov + ComputeResolutionFovOffset();
+            float effective = targetOrthoSize + ComputeResolutionOrthoOffset();
             var lens = vcam.Lens;
-            if(Mathf.Abs(lens.FieldOfView - effectiveFov) < 0.005f)
+            if(Mathf.Abs(lens.OrthographicSize - effective) < 0.005f)
             {
-                if(lens.FieldOfView != effectiveFov)
+                if(lens.OrthographicSize != effective)
                 {
-                    lens.FieldOfView = effectiveFov;
+                    lens.OrthographicSize = effective;
                     vcam.Lens = lens;
                 }
                 return;
             }
-            lens.FieldOfView = Mathf.Lerp(lens.FieldOfView, effectiveFov, zoomSmoothSpeed * Time.deltaTime);
+            lens.OrthographicSize = Mathf.Lerp(lens.OrthographicSize, effective, zoomSmoothSpeed * Time.deltaTime);
             vcam.Lens = lens;
         }
 
-        // 화면 비율이 idealAspect(16:9)보다 좁을수록 카메라를 뒤로 당긴 효과를 FOV로 보정.
-        // Bruno Simon folio-2025 View.js의 ratioOverflow + nonIdealRatioOffset 로직을 Unity FOV로 변환.
-        float ComputeResolutionFovOffset()
+        // 화면이 idealAspect보다 좁을 때 더 넓은 영역을 보이도록 OrthoSize를 키움
+        float ComputeResolutionOrthoOffset()
         {
             float currentAspect = (float)Screen.width / Screen.height;
             float ratioOverflow = Mathf.Max(0f, idealAspect / currentAspect - 1f);
             if(ratioOverflow < 0.0001f) return 0f;
-
-            float distMult = 1f + ratioOverflow * (nonIdealRatioOffset / baseDistance);
-            float adjustedFov = 2f * Mathf.Atan(Mathf.Tan(targetFov * 0.5f * Mathf.Deg2Rad) * distMult) * Mathf.Rad2Deg;
-            return adjustedFov - targetFov;
+            return targetOrthoSize * ratioOverflow * (nonIdealRatioOffset / baseDistance);
         }
 
         void UpdateFollowTarget()
         {
             if(Ball.Instance == null || followTarget == null) return;
 
-            // 드래그 떼면 팬 오프셋이 부드럽게 0으로 수렴 → 공으로 복귀
             if(!isPanning)
                 panOffset = Vector3.Lerp(panOffset, Vector3.zero, returnSpeed * Time.deltaTime);
 
             Vector3 ballPos = Ball.Instance.GetPosition();
-            Vector3 target = new Vector3(ballPos.x, ballPos.y, ballPos.z);
-            followTarget.position = target + panOffset;
+            followTarget.position = ballPos + panOffset;
         }
 
         void HandleZoom()
         {
-            // 마우스 휠
             float wheel = Input.GetAxisRaw("Mouse ScrollWheel");
             if(Mathf.Abs(wheel) > 0.0001f)
                 ApplyZoom(-wheel * wheelZoomSpeed);
 
-            // 터치 핀치 (두 손가락)
             if(Input.touchCount >= 2)
             {
                 Touch t0 = Input.GetTouch(0);
@@ -223,13 +208,11 @@ namespace MiniGolf
 
         void ApplyZoom(float delta)
         {
-            // 목표값만 즉시 갱신. 실제 렌즈는 ApplyZoomSmoothing()이 lerp
-            targetFov = Mathf.Clamp(targetFov + delta, minZoom, maxZoom);
+            targetOrthoSize = Mathf.Clamp(targetOrthoSize + delta, minOrthoSize, maxOrthoSize);
         }
 
         void HandlePan()
         {
-            // 핀치 중이면 팬 금지
             if(Input.touchCount >= 2)
             {
                 isPanning = false;
@@ -238,8 +221,6 @@ namespace MiniGolf
 
             if(Input.GetMouseButtonDown(0))
             {
-                // InputController가 공 터치로 간주하지 않은 경우에만 팬 시작
-                // (IsInteractingWithBall은 Update 맨 앞에서 차단됨)
                 lastMouseScreen = Input.mousePosition;
                 isPanning = true;
             }
@@ -249,22 +230,16 @@ namespace MiniGolf
                 Vector2 deltaPx = (Vector2)(cur - lastMouseScreen);
                 lastMouseScreen = cur;
 
-                // 픽셀 → 월드 변환. perspective: 타깃 평면(공이 위치한 y=0)까지 거리 기반.
-                // 화면 높이 = 2 * distance * tan(fov/2) 월드 유닛.
-                float distance = followTarget != null
-                    ? Vector3.Distance(cam.transform.position, followTarget.position)
-                    : Vector3.Distance(cam.transform.position, Vector3.zero);
-                float fovRad = vcam.Lens.FieldOfView * Mathf.Deg2Rad;
-                float worldPerPixelY = (2f * distance * Mathf.Tan(fovRad * 0.5f)) / Screen.height;
-                float worldPerPixelX = worldPerPixelY; // aspect는 viewport 기준이라 y와 동일 스케일
+                // Orthographic: 화면 높이 = 2 * orthoSize 월드 유닛 (거리 무관)
+                float orthoSize = vcam != null ? vcam.Lens.OrthographicSize : baseOrthoSize;
+                float worldPerPixelY = (2f * orthoSize) / Screen.height;
+                float worldPerPixelX = worldPerPixelY;
 
-                // 화면 상 드래그 방향의 반대로 카메라가 움직이는 느낌 (공을 드래그해서 '당겨오는' 느낌)
-                // XZ 평면 기준. cam forward를 XZ로 평탄화.
-                Vector3 camRightXZ = new Vector3(cam.transform.right.x, 0f, cam.transform.right.z).normalized;
+                Vector3 camRightXZ   = new Vector3(cam.transform.right.x,   0f, cam.transform.right.z).normalized;
                 Vector3 camForwardXZ = new Vector3(cam.transform.forward.x, 0f, cam.transform.forward.z).normalized;
 
                 Vector3 worldDelta =
-                    -camRightXZ * (deltaPx.x * worldPerPixelX)
+                    -camRightXZ   * (deltaPx.x * worldPerPixelX)
                     - camForwardXZ * (deltaPx.y * worldPerPixelY);
 
                 panOffset += worldDelta * panSensitivity;
@@ -275,7 +250,6 @@ namespace MiniGolf
             }
         }
 
-        // HUDManager 등 외부 호환 API 유지. 카메라 위치를 즉시 공으로 스냅.
         public void SetPosition(Vector3 pos)
         {
             panOffset = Vector3.zero;
@@ -286,7 +260,6 @@ namespace MiniGolf
             }
         }
 
-        // 외부에서 줌 호출용 (호환 유지, 현재 미사용)
         public void Zoom(float delta)
         {
             ApplyZoom(-delta * wheelZoomSpeed);

@@ -22,7 +22,7 @@ namespace MiniGolf
 
         void Start()
         {
-            SetScreen(mainMenuScreen);
+            // SetScreen(mainMenuScreen);
         }
 
         void SetScreen(GameObject screen)

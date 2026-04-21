@@ -31,12 +31,9 @@ Shader "MiniGolf/GroundGradient"
             #pragma vertex   Vert
             #pragma fragment Frag
 
-            // multi_compile: URP가 전역으로 켜고 끄는 키워드 → 반드시 multi_compile 사용.
-            // 섀도 cascade: 3 variants (없음 / 기본 / cascade / screen-space)
+            // Screen-space shadows 포함 + PCF 전 품질 단계 — WebGL 블록 현상 방지
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
-            // 소프트 섀도: 2 variants. LOW/MEDIUM/HIGH 품질 단계는 URP 13+ 신규 키워드인데
-            // WebGL에서 변형 수를 줄이려면 단순 _SHADOWS_SOFT 만 선언하는 것이 낫다.
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -82,8 +79,11 @@ Shader "MiniGolf/GroundGradient"
                 half4 color   = lerp(_ColorBottom, _ColorTop, t);
 
                 // ── 그림자 수신 ─────────────────────────────────────────
-                // fragment에서 계산해야 cascade 경계 오차 없음
-                #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)
+                // Screen-space 모드: screenPos(float4) 그대로 전달, GetMainLight 내부에서 /w
+                // Shadow map 모드: world pos → cascade 선택
+                #if defined(_MAIN_LIGHT_SHADOWS_SCREEN)
+                    float4 shadowCoord = IN.screenPos;
+                #elif defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
                     float4 shadowCoord = TransformWorldToShadowCoord(IN.positionWS);
                 #else
                     float4 shadowCoord = float4(0, 0, 0, 0);

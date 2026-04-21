@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_RenderingLayerMask
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 8505de86343ed9e4f8e0b47158eb3dcc, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 80d52fc6e5670934dbef5152ca509aa4, type: 2}
     - target: {fileID: -5148914591892728797, guid: 8505de86343ed9e4f8e0b47158eb3dcc, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -72,6 +76,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 4630957511536181541, guid: 8505de86343ed9e4f8e0b47158eb3dcc, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 80d52fc6e5670934dbef5152ca509aa4, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

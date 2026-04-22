@@ -1,9 +1,21 @@
 fileFormatVersion: 2
 guid: 05eda33ef5c91e947a1da5d152163c1c
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325585
+  packageName: Mini Golf - Complete Game
+  packageVersion: 1.0
+  assetPath: Assets/MiniGolf/Models/Course Parts/hole-square.fbx
+  uploadId: 772738
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: colormap.002
+    second: {fileID: 2100000, guid: 78955ef12e340474384ea2151fb62d6b, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -56,6 +68,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
@@ -88,7 +103,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.010001
+    globalScale: 1.0001
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
@@ -105,10 +120,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 325585
-  packageName: Mini Golf - Complete Game
-  packageVersion: 1.0
-  assetPath: Assets/MiniGolf/Models/Course Parts/hole-square.fbx
-  uploadId: 772738

@@ -31,4 +31,4 @@ MonoBehaviour:
     HolePrefab: {fileID: 3514501570942771561, guid: 70511bc4cd3d9254ca8eff0cb2c9929f, type: 3}
   - Par: 1
     HolePrefab: {fileID: 2234846270872846206, guid: df960bb7d0a838a49b60254c2b7f6c2d, type: 3}
-  GameScene: Game_Forest
+  GameScene: Game_Classic

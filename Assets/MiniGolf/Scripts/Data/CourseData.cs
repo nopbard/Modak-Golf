@@ -15,6 +15,6 @@ namespace MiniGolf
         public string DisplayName;
         public CourseDifficulty Difficulty;
         public HoleData[] Holes;
-        public string GameScene = "Game_Forest";
+        public string GameScene = "Game_Classic";
     }
 }

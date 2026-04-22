@@ -34,7 +34,7 @@ namespace MiniGolf
             triggered = true;
 
             if(sinkSFX != null)
-                AudioSource.PlayClipAtPoint(sinkSFX, transform.position, sfxVolume);
+                AudioUtil.PlaySfx2D(sinkSFX, sfxVolume);
             if(sinkParticle != null)
                 sinkParticle.Play(true);
             if(flag != null)

@@ -68,9 +68,9 @@ namespace MiniGolf
                 Destroy(fx, effectLifetime);
             }
 
-            // 효과음 (오브젝트 파괴 후에도 재생되도록 PlayClipAtPoint 사용)
+            // 효과음 — 2D 로 재생해서 카메라 거리 감쇠 없이 일정 볼륨으로 들리게
             if(explosionSFX != null)
-                AudioSource.PlayClipAtPoint(explosionSFX, center, sfxVolume);
+                AudioUtil.PlaySfx2D(explosionSFX, sfxVolume);
 
             // ── 공: 기존 방식 유지 (velocity 초기화 후 방향+upwardBias 로 발사) ──
             if(ballRig != null)

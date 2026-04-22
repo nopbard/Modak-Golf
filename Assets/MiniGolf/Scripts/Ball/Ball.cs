@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Unity.Collections;
+using DG.Tweening;
 
 namespace MiniGolf
 {
@@ -59,6 +60,12 @@ namespace MiniGolf
         [SerializeField]
         private AudioClip outOfBoundsHitSFX;
 
+        [Header("Spawn Pop-in")]
+        [Tooltip("PlaySpawnPopIn() 시 scale 0→원본 되돌리는 시간 (초)")]
+        [SerializeField] private float spawnPopDuration = 0.45f;
+        [Tooltip("PlaySpawnPopIn() 이징")]
+        [SerializeField] private Ease spawnPopEase = Ease.OutBack;
+
         public bool IsAiming { get; private set; }
         public float CurrentPowerPercent { get; private set; }
         public Vector3 CurrentAimDirection { get; private set; }
@@ -67,8 +74,18 @@ namespace MiniGolf
         private float settleEndTime;
         public bool IsSettling => Time.time < settleEndTime;
 
+        // PlaySpawnPopIn 중이면 true (scale 0→원본 트윈 중). WaitingIndicator / 조준 모두 블록.
+        public bool IsSpawning { get; private set; }
+
+        // 외부(GameManager 등) 에서 카메라 팔로우 지연을 pop-in 지속시간과 맞출 때 사용.
+        public float SpawnPopDuration => spawnPopDuration;
+
         // 물리적으로 공이 움직이고 있는지 (CurState 에 의존하지 않는 실시간 판정).
         public bool IsMoving => rig != null && !rig.isKinematic && rig.linearVelocity.sqrMagnitude > 0.0001f;
+
+        // OOB 에 닿아 리스폰 대기 중인지. TryScheduleRespawn 으로 코루틴 예약된 동안 true.
+        // 이 상태에서 공이 정지해도 WaitingIndicator 가 노출되지 않도록 체크용.
+        public bool IsAwaitingRespawn => respawnCoroutine != null;
 
         // 외부(MenuSceneController 등)에서 호출. duration 초 동안 인디케이터/조준 블록.
         public void StartSpawnSettle(float duration = 1.0f)
@@ -430,6 +447,11 @@ namespace MiniGolf
 
         public void SetPosition(Vector3 position)
         {
+            // 이전에 예약된 OOB 리스폰 코루틴 참조 정리.
+            // GameObject.SetActive(false) 로 coroutine 이 멈춰도 이 field 는 남아있어서
+            // 재활성화 시 IsAwaitingRespawn 이 계속 true 로 보고 WaitingIndicator 가 안 뜨는 버그 방지.
+            respawnCoroutine = null;
+
             rig.position = position;
             transform.position = position;
             rig.linearVelocity = Vector3.zero;
@@ -446,6 +468,35 @@ namespace MiniGolf
         public Vector3 GetPosition()
         {
             return rig.position;
+        }
+
+        // Menu 씬의 Coin.PlaySpawnPopIn 과 동일 패턴: scale 0→원본 튕겨 등장.
+        // 팝인 중엔 Rigidbody 를 kinematic 으로 잠궈서 중력/충돌 영향 X → 공이 공중에서 튕기며 커지는 연출.
+        // 완료 시 kinematic 해제 → 정상 물리 복귀. StartSpawnSettle 과 병행 호출하면 조준 입력까지 같이 블록됨.
+        public void PlaySpawnPopIn()
+        {
+            Vector3 target = transform.localScale;
+            if(target.sqrMagnitude < 0.0001f) target = Vector3.one;   // 이미 scale 0 으로 들어온 경우 fallback
+
+            transform.DOKill();
+            transform.localScale = Vector3.zero;
+            IsSpawning = true;
+
+            if(rig != null)
+            {
+                // kinematic 전환 전에 속도 제거 (kinematic 상태에선 velocity 할당 시 경고)
+                rig.linearVelocity = Vector3.zero;
+                rig.angularVelocity = Vector3.zero;
+                rig.isKinematic = true;
+            }
+
+            transform.DOScale(target, spawnPopDuration)
+                .SetEase(spawnPopEase)
+                .OnComplete(() =>
+                {
+                    if(rig != null) rig.isKinematic = false;
+                    IsSpawning = false;
+                });
         }
 
         void OnBallSunk()

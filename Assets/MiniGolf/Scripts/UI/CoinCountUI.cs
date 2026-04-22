@@ -10,7 +10,7 @@ namespace MiniGolf
     public sealed class CoinCountUI : MonoBehaviour
     {
         [Tooltip("표시 포맷. {0} 자리에 숫자 들어감")]
-        [SerializeField] private string format = "x {0}";
+        [SerializeField] private string format = "{0}";
 
         [Tooltip("증가 시 살짝 punch 애니메이션")]
         [SerializeField] private bool punchOnChange = true;

@@ -60,6 +60,10 @@ namespace MiniGolf
         // 입력에서 바로 갱신되는 목표 Ortho Size. 실제 lens는 이 값으로 lerp
         private float targetOrthoSize;
 
+        // 이 Time.time 시점 전까지는 followTarget 위치 갱신을 멈춤(= 카메라가 공을 따라가지 않음).
+        // 0 이면 항상 추적. FreezeFollow() 로 설정.
+        private float followResumeTime;
+
         void Awake()
         {
             cam = GetComponentInChildren<Camera>();
@@ -180,6 +184,11 @@ namespace MiniGolf
         {
             if(Ball.Instance == null || followTarget == null) return;
 
+            // Freeze 구간이면 followTarget 위치를 갱신하지 않음 → 카메라는 제자리 유지.
+            // 끝나는 시점에 followTarget 이 공 위치로 스냅되고, Cinemachine damping 으로 부드럽게 이어서 따라감.
+            if(Time.time < followResumeTime)
+                return;
+
             if(!isPanning)
                 panOffset = Vector3.Lerp(panOffset, Vector3.zero, returnSpeed * Time.deltaTime);
 
@@ -272,6 +281,14 @@ namespace MiniGolf
         {
             StopCoroutine(nameof(DampingCoroutine));
             StartCoroutine(DampingCoroutine(damping, duration));
+        }
+
+        // 지정된 시간 동안 followTarget 위치 갱신을 중단(= 카메라가 공을 따라가지 않음).
+        // 이미 더 먼 시점까지 freeze 예약돼 있으면 그 쪽이 우선 (짧은 호출이 기존 예약을 단축시키지 않음).
+        public void FreezeFollow(float seconds)
+        {
+            if(seconds <= 0f) return;
+            followResumeTime = Mathf.Max(followResumeTime, Time.time + seconds);
         }
 
         IEnumerator DampingCoroutine(float target, float duration)

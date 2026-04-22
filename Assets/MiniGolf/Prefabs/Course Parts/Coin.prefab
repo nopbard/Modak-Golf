@@ -22,15 +22,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.867
+      value: -0.53999996
       objectReference: {fileID: 0}
     - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.174
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.65
+      value: 0.7190001
       objectReference: {fileID: 0}
     - target: {fileID: 4755009023550827309, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -63,6 +63,10 @@ PrefabInstance:
     - target: {fileID: 5383770982202110359, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
       propertyPath: m_Name
       value: Coin
+      objectReference: {fileID: 0}
+    - target: {fileID: 7401929119244594423, guid: 1210c36bde7ef448397bfa5c3353d0a3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.089
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -115,12 +119,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MiniGolf.Coin
   value: 1
   idleSpin: 1
-  idleSpinSpeed: 120
-  idleBobHeight: 0.05
+  idleSpinSpeed: 80
+  idleBobHeight: 0
   idleBobPeriod: 1.2
   popRise: 0.8
   popDuration: 0.4
   popSpin: 720
   popScale: 1.4
-  pickupSFX: {fileID: 0}
+  pickupSFX: {fileID: 8300000, guid: f082ac09cbb3e4c4c817748e4cb9df54, type: 3}
   sfxVolume: 1
+  spawnPopDuration: 0.45
+  spawnPopEase: 27

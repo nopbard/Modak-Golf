@@ -45,7 +45,10 @@ namespace MiniGolf
         private RectTransform powerArrowRT;
         private UIVerticalGradient arrowGradient;
 
-        void Start()
+        // Awake 에서 unparent — Ball.SetActive(false) / scale 트윈 등 부모 측 생명주기 영향 차단.
+        // Start 에서 하면 GameManager 가 Ball 을 비활성화한 뒤 Start 실행이 지연돼,
+        // Ball 의 스케일 트윈 중간값으로 unparent 되어 world scale 이 고정되는 버그가 생김.
+        void Awake()
         {
             transform.parent = null;
             container = (RectTransform)transform;

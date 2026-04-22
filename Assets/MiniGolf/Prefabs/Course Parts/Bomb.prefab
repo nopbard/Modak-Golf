@@ -114,7 +114,7 @@ MonoBehaviour:
   blastLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  explosionSFX: {fileID: 0}
+  explosionSFX: {fileID: 8300000, guid: dd26d88efd64c2c40972a0b88d0eca8b, type: 3}
   sfxVolume: 1
   effectLifetime: 3
 --- !u!135 &2692020517776989635

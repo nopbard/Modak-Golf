@@ -41,10 +41,15 @@ namespace MiniGolf
             // Gather all the meshes needed to combine.
             CombineInstance[] combine = new CombineInstance[meshFilters.Count];
 
+            // world-space 로 결합하면 이후 holeObject 가 움직일 때(두트윈 인트로 등) 콜라이더가 엉키므로,
+            // holeObject 의 LOCAL space 로 변환 후 결합. holeObject 의 MeshCollider 는 sharedMesh 를 자기
+            // local space 로 해석하기 때문에, 루트가 이동해도 콜라이더가 올바르게 따라옴.
+            Matrix4x4 worldToHoleLocal = holeObject.transform.worldToLocalMatrix;
+
             for(int i = 0; i < meshFilters.Count; i++)
             {
                 combine[i].mesh = meshFilters[i].sharedMesh;
-                combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+                combine[i].transform = worldToHoleLocal * meshFilters[i].transform.localToWorldMatrix;
 
                 // Disable the old mesh collider components as we don't need them anymore.
                 if(meshFilters[i].TryGetComponent<MeshCollider>(out var mc))

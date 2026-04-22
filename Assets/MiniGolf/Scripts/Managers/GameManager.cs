@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using DG.Tweening;
 
 namespace MiniGolf
 {
@@ -13,6 +14,20 @@ namespace MiniGolf
 
         [Tooltip("에디터 직접 테스트용 플레이어 수 (1 또는 2)")]
         [SerializeField] private int editorDefaultPlayerCount = 1;
+
+        [Header("Hole Intro Animation (Menu GameStart 와 동일한 느낌)")]
+        [Tooltip("새 홀 로드 시 코스가 지하에서 뿅 올라오는 두트윈 연출 사용 여부")]
+        [SerializeField] private bool holeIntroPopUp = true;
+        [Tooltip("지하에서 뿅 올라오는 Y 오프셋 (m)")]
+        [SerializeField] private float holeIntroPopDepth = 3f;
+        [Tooltip("등장 시간 (초)")]
+        [SerializeField] private float holeIntroPopDuration = 0.7f;
+        [Tooltip("코스 등장 완료 후 공이 팝인 되기까지의 대기 시간 (초). Menu 씬의 동전 스폰 대기와 유사한 breathing room.")]
+        [SerializeField] private float holeIntroBallSpawnDelay = 0.3f;
+        [Tooltip("공이 나타난 뒤 카메라 팔로우 시작까지의 fallback 대기 시간. Ball.PlaySpawnPopIn 이 유효하면 그 지속시간(= Ball 의 Spawn Pop Duration)이 우선 사용됨. 공 pop-in 이 끝나는 순간 정확히 카메라가 따라오기 시작하도록.")]
+        [SerializeField] private float holeIntroCameraFollowDelay = 1.5f;
+        [Tooltip("공 스폰 후 조준 입력이 차단되는 시간 (공 정착 연출)")]
+        [SerializeField] private float holeIntroBallSettleDuration = 1.0f;
 
         public CourseData CurrentCourse  { get; private set; }
         public GameObject CurrentHoleObject { get; private set; }
@@ -154,15 +169,63 @@ namespace MiniGolf
                 return;
             }
 
+            // 공 위치 먼저 세팅 (OnLoadHole → CameraController.OnLoadHole 에서 공 위치로 카메라 워프하기 때문).
+            // 이렇게 하면 홀이 지하에 있어도 카메라는 처음부터 새 홀 위치를 바라봄.
             Ball.Instance.SetPosition(ballStart.transform.position);
+
             // 마커 전부 숨김 (쓰지 않은 다른 플레이어의 start 도 안 보이게)
             if(starts.Length > 0)
-            {
                 foreach(var s in starts) s.gameObject.SetActive(false);
-            }
             else
-            {
                 ballStart.SetActive(false);
+
+            // 두트윈 인트로 연출: 홀을 지하로 밀어내리고, 공은 잠시 숨겨둠. 코루틴이 뿅 올라오는 애니메이션 담당.
+            // ballStart 는 hole 의 자식 → hole 이 올라오면 ballStart 의 world 위치도 원래대로 복귀.
+            if(holeIntroPopUp)
+            {
+                Ball.Instance.gameObject.SetActive(false);
+                float originalY = CurrentHoleObject.transform.position.y;
+                CurrentHoleObject.transform.position += Vector3.down * holeIntroPopDepth;
+                // ballStart Transform 을 전달 → 애니메이션 종료 후 그 시점의 world 좌표로 공 재배치.
+                StartCoroutine(HoleIntroAnimation(originalY, ballStart.transform));
+            }
+        }
+
+        // Menu 씬의 GameStart 팝업 패턴과 동일 느낌: OutBack 이징으로 Y 복귀 → 공 활성화 → 카메라 잠시 정지.
+        IEnumerator HoleIntroAnimation(float targetY, Transform ballStartTransform)
+        {
+            // 코스 전체가 DOMoveY 로 지하→본래 위치
+            if(CurrentHoleObject != null)
+                yield return CurrentHoleObject.transform
+                    .DOMoveY(targetY, holeIntroPopDuration)
+                    .SetEase(Ease.OutBack)
+                    .WaitForCompletion();
+
+            if(holeIntroBallSpawnDelay > 0f)
+                yield return new WaitForSeconds(holeIntroBallSpawnDelay);
+
+            // 공 활성화 → SetPosition 으로 Rigidbody/Transform 재동기화 (비활성 상태에서 설정한 position 이
+            // 재활성 시 어긋나는 경우 대비. Menu 의 SpawnBallAt 과 동일 순서).
+            // 이후 Menu 코인과 동일 패턴의 scale 팝인 + 조준 블록 (settle).
+            if(Ball.Instance != null)
+            {
+                Ball.Instance.gameObject.SetActive(true);
+                if(ballStartTransform != null)
+                    Ball.Instance.SetPosition(ballStartTransform.position);
+                Ball.Instance.StartSpawnSettle(holeIntroBallSettleDuration);
+                Ball.Instance.PlaySpawnPopIn();
+            }
+
+            // 카메라 팔로우 잠금 → 공 pop-in 이 끝나는 타이밍에 정확히 풀리도록.
+            // Ball 의 SpawnPopDuration 과 일치시켜 "공이 원래 크기 되면 바로 카메라 잡기" 를 구현.
+            // Ball.Instance 없거나 pop 지속시간 0이면 인스펙터의 fallback 값 사용.
+            var camCtrl = FindAnyObjectByType<CameraController>();
+            if(camCtrl != null)
+            {
+                float freezeDuration = (Ball.Instance != null && Ball.Instance.SpawnPopDuration > 0f)
+                    ? Ball.Instance.SpawnPopDuration
+                    : holeIntroCameraFollowDelay;
+                camCtrl.FreezeFollow(freezeDuration);
             }
         }
 

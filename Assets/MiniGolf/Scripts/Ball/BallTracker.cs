@@ -43,8 +43,9 @@ namespace MiniGolf
             if(snapToGround)
             {
                 int effectiveMask = snapLayers.value & ~(1 << ball.layer);
-                // 공 위쪽에서 아래로 raycast (공 본체 collider 는 레이어로 제외됨)
-                Ray ray = new Ray(ball.transform.position + Vector3.up * 0.5f, Vector3.down);
+                // 공 중심에서 아래로 raycast. 공 위로 offset 을 주면 공이 2층 오버행 아래에 있을 때
+                // ray 시작점이 2층 윗면으로 올라가서 엉뚱한 표면에 스냅됨. 공 collider 는 레이어로 제외됨.
+                Ray ray = new Ray(ball.transform.position, Vector3.down);
                 if(Physics.Raycast(ray, out RaycastHit hit, snapMaxDistance, effectiveMask, QueryTriggerInteraction.Ignore))
                 {
                     // surface 바로 위에 살짝 띄워서 배치 (Z-fighting 방지)

@@ -356,6 +356,8 @@ MonoBehaviour:
   wallHitParticlePrefab: {fileID: 5238538877814813142, guid: 47096eff328e11a418ace7db2d72aa97, type: 3}
   wallHitCooldown: 0.15
   outOfBoundsHitSFX: {fileID: 8300000, guid: 2aedc45f9aeba49cebf57366475c6227, type: 3}
+  spawnPopDuration: 0.45
+  spawnPopEase: 27
   outOfBoundsRespawnDelay: 1
   slowStopThreshold: 0.2
   slowStopDrag: 4
@@ -647,6 +649,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ball: {fileID: 5630886133674654660}
   offset: {x: 0, y: -0.04, z: 0}
+  snapToGround: 0
+  snapMaxDistance: 30
+  snapLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  snapSurfaceClearance: 0.02
 --- !u!1 &7861850845247147350
 GameObject:
   m_ObjectHideFlags: 0
@@ -793,8 +801,8 @@ MonoBehaviour:
     serializedVersion: 0
     m_Bits: 2
   m_ScaleMode: 0
-  m_Offset: {x: 0, y: 0, z: 2.5}
-  m_Size: {x: 0.15, y: 0.15, z: 5}
+  m_Offset: {x: 0, y: 0, z: 0.15}
+  m_Size: {x: 0.15, y: 0.15, z: 0.3}
   m_FadeFactor: 0.6
   m_VisibleInScene: 1
   version: 1
@@ -813,3 +821,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ball: {fileID: 5630886133674654660}
   offset: {x: 0, y: 0, z: 0}
+  snapToGround: 1
+  snapMaxDistance: 30
+  snapLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  snapSurfaceClearance: 0.02

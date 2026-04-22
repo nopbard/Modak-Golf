@@ -15,6 +15,16 @@ namespace MiniGolf
         [Tooltip("에디터 직접 테스트용 플레이어 수 (1 또는 2)")]
         [SerializeField] private int editorDefaultPlayerCount = 1;
 
+        [Header("2P Multi-Ball")]
+        [Tooltip("2P 모드에서 2P 공을 생성할 때 사용할 Ball 프리펩. 씬의 Ball 인스턴스를 1P 공으로 사용.")]
+        [SerializeField] private GameObject ballPrefab;
+
+        [Tooltip("2P 공의 Model 메쉬에 적용할 머터리얼 (주황색)")]
+        [SerializeField] private Material ball2PMaterial;
+
+        [Tooltip("공이 멈춘 뒤 턴 전환까지 대기 시간 (초)")]
+        [SerializeField] private float turnSwitchDelay = 0.6f;
+
         [Header("Hole Intro Animation (Menu GameStart 와 동일한 느낌)")]
         [Tooltip("새 홀 로드 시 코스가 지하에서 뿅 올라오는 두트윈 연출 사용 여부")]
         [SerializeField] private bool holeIntroPopUp = true;
@@ -48,12 +58,28 @@ namespace MiniGolf
 
         public int CurrentPar { get; private set; }
 
+        // 2P: 각 플레이어가 이번 홀에서 이미 홀인 했는지. SpawnHole 에서 false 로 초기화.
+        private bool[] sunkPerPlayer;
+        // 2P: 멀티볼 배열. balls[0]=1P, balls[1]=2P. 씬 Ball 은 1P, 2P 는 런타임 Instantiate.
+        private Ball[] balls;
+        // 턴 전환 코루틴 중복 실행 방지. 외부에서 입력/인디케이터 차단용으로도 사용.
+        private bool turnSwitching;
+
+        // 턴 전환 중(공이 멈추고 상대에게 넘어가는 대기 시간) 여부. 이 동안은 입력/대기 인디케이터 둘 다 block.
+        // 더블샷(공 멈추자마자 바로 또 때리기) 방지용.
+        public bool IsTurnSwitching => turnSwitching;
+
         public event System.Action<CourseData>      OnLoadCourse;
         public event System.Action<CourseData, int> OnLoadHole;
         public event System.Action                  OnBallSunk;
         public event System.Action<int>             OnPlayerChanged;   // 넘겨주는 값: 새 플레이어 (0-based)
 
         public static GameManager Instance;
+
+        // Menu 에서 코스 선택 후 씬을 로드한 경우 true. GameManager.Start 가 읽고 바로 false 로 리셋.
+        // 에디터에서 Game 씬을 직접 Play 할 때는 false 로 유지 → PlayerPrefs 의 stale 값 무시하고
+        // 인스펙터의 editorDefault* 값 사용. 빌드/정상 플레이에는 영향 없음.
+        public static bool CameFromMenu;
 
         void Awake()
         {
@@ -62,18 +88,81 @@ namespace MiniGolf
 
         void Start()
         {
-            #if UNITY_EDITOR
-                int courseIndex  = editorDefaultCourseIndex;
-                int playerCount  = editorDefaultPlayerCount;
-            #else
-                int courseIndex  = PlayerPrefs.HasKey("CourseToPlay")
+            int courseIndex;
+            int playerCount;
+            if(CameFromMenu)
+            {
+                // Menu 경유로 진입 → PlayerPrefs 우선. 없으면 editor default fallback.
+                courseIndex = PlayerPrefs.HasKey("CourseToPlay")
                     ? PlayerPrefs.GetInt("CourseToPlay") : editorDefaultCourseIndex;
-                int playerCount  = PlayerPrefs.GetInt("PlayerCount", 1);
-            #endif
+                playerCount = PlayerPrefs.HasKey("PlayerCount")
+                    ? PlayerPrefs.GetInt("PlayerCount") : editorDefaultPlayerCount;
+                CameFromMenu = false;
+            }
+            else
+            {
+                // 씬 직접 Play (에디터 테스트) → 인스펙터의 editorDefault 값만 사용.
+                // 이전 Menu 플레이가 남긴 PlayerPrefs 의 stale 값은 무시.
+                courseIndex = editorDefaultCourseIndex;
+                playerCount = editorDefaultPlayerCount;
+            }
 
             PlayerCount = Mathf.Clamp(playerCount, 1, 2);
+
+            // 2P 멀티볼 설정: 씬에 있는 Ball 을 1P 로 쓰고, 필요하면 2P Ball 을 프리펩에서 생성.
+            SetupBalls();
+
             LoadCourse(courseIndex);
-            Ball.Instance.OnHit += OnBallHit;
+
+            // OnAnyHit: 어느 공이든 치면 호출. 현재 턴 플레이어만 stroke 카운트.
+            Ball.OnAnyHit += OnAnyBallHit;
+            // OnAnyBeginWaiting: 어느 공이든 멈추면 호출. 현재 턴 공이 멈추면 턴 전환 로직.
+            Ball.OnAnyBeginWaiting += OnAnyBallBeginWaiting;
+        }
+
+        void OnDestroy()
+        {
+            Ball.OnAnyHit -= OnAnyBallHit;
+            Ball.OnAnyBeginWaiting -= OnAnyBallBeginWaiting;
+        }
+
+        // 2P 멀티볼 초기화. 씬의 기존 Ball 을 1P 로 배정하고, 2P 모드면 Ball 프리펩 Instantiate.
+        void SetupBalls()
+        {
+            balls = new Ball[PlayerCount];
+
+            // 1P: 씬에 존재하는 Ball (Ball.All[0]).
+            if(Ball.All.Count > 0)
+            {
+                balls[0] = Ball.All[0];
+                balls[0].PlayerIndex = 0;
+            }
+            else
+            {
+                Debug.LogError("GameManager: 씬에 Ball 이 없습니다.");
+                return;
+            }
+
+            // 2P 모드: 프리펩으로 2P 공 생성 + 주황 머터리얼.
+            if(PlayerCount >= 2)
+            {
+                if(ballPrefab == null)
+                {
+                    Debug.LogError("GameManager: 2P 모드지만 ballPrefab 이 비어있습니다. Inspector 에서 Ball.prefab 할당 필요.");
+                    return;
+                }
+                GameObject ball2PGO = Instantiate(ballPrefab);
+                ball2PGO.name = "Ball_2P";
+                balls[1] = ball2PGO.GetComponent<Ball>();
+                balls[1].PlayerIndex = 1;
+                if(ball2PMaterial != null)
+                    balls[1].SetBodyMaterial(ball2PMaterial);
+            }
+
+            sunkPerPlayer = new bool[PlayerCount];
+
+            // 1P 를 기본 활성 공으로.
+            Ball.SetActive(balls[0]);
         }
 
         void LoadCourse(int courseListIndex)
@@ -119,7 +208,7 @@ namespace MiniGolf
             OnLoadHole?.Invoke(CurrentCourse, hole);
         }
 
-        // 홀 프리팹 생성 + 공 스폰. 플레이어 전환 시에도 재사용.
+        // 홀 프리팹 생성 + 공 스폰. 2P 는 두 공을 동시에 각자의 BallStart 위치에 배치.
         void SpawnHole()
         {
             if(CurrentHoleObject != null)
@@ -129,72 +218,86 @@ namespace MiniGolf
                 CurrentCourse.Holes[CurrentHole - 1].HolePrefab,
                 Vector3.zero, Quaternion.identity);
 
-            // BallStart 컴포넌트 기준으로 스폰 위치 선택 (playerIndex 매칭).
-            // 컴포넌트가 붙어있지 않은 레거시 프리팹은 tag 기반 fallback.
-            BallStart[] starts = CurrentHoleObject.GetComponentsInChildren<BallStart>(true);
+            // 이번 홀의 플레이어별 sunk 상태 초기화.
+            if(sunkPerPlayer != null)
+            {
+                for(int i = 0; i < sunkPerPlayer.Length; i++) sunkPerPlayer[i] = false;
+            }
 
-            GameObject ballStart = null;
+            // BallStart 컴포넌트 기준으로 각 플레이어별 스폰 위치 선택.
+            BallStart[] starts = CurrentHoleObject.GetComponentsInChildren<BallStart>(true);
+            Transform[] spawnTransforms = new Transform[PlayerCount];
+
             if(starts.Length > 0)
             {
-                // 현재 플레이어용 BallStart 찾기
-                foreach(var s in starts)
+                // 각 플레이어용 BallStart 매칭
+                for(int p = 0; p < PlayerCount; p++)
                 {
-                    if(s.PlayerIndex == CurrentPlayer)
+                    foreach(var s in starts)
                     {
-                        ballStart = s.gameObject;
-                        break;
+                        if(s.PlayerIndex == p)
+                        {
+                            spawnTransforms[p] = s.transform;
+                            break;
+                        }
+                    }
+                    if(spawnTransforms[p] == null)
+                    {
+                        int fallbackP = (p == 0 ? 1 : 0);
+                        Debug.LogError($"Hole {CurrentHole}: BallStart with playerIndex={p} 없음. {fallbackP}P 위치로 fallback.");
+                        spawnTransforms[p] = starts[0].transform;
                     }
                 }
-
-                // 2P 모드인데 내 위치 못 찾은 경우 → 에러 + 첫 번째로 fallback (게임은 이어가게)
-                if(ballStart == null)
-                {
-                    Debug.LogError($"Hole {CurrentHole}: BallStart with playerIndex={CurrentPlayer} 없음. 2P 스폰 지점을 배치하세요. 1P 위치로 fallback.");
-                    ballStart = starts[0].gameObject;
-                }
-                else if(PlayerCount > 1 && starts.Length < PlayerCount)
-                {
-                    Debug.LogError($"Hole {CurrentHole}: BallStart 가 1개만 있음 ({starts.Length}/{PlayerCount}). 2P 용 BallStart 추가 필요.");
-                }
             }
             else
             {
-                // 완전 레거시: BallStart 컴포넌트 없는 프리팹 → tag 로 시도
-                ballStart = GameObject.FindGameObjectWithTag("BallStart");
+                // 레거시: tag 기반 fallback. 한 위치만 있음 → 모든 플레이어 같은 위치.
+                GameObject tagStart = GameObject.FindGameObjectWithTag("BallStart");
+                if(tagStart == null)
+                {
+                    Debug.LogError($"Hole {CurrentHole} has no BallStart.");
+                    return;
+                }
+                for(int p = 0; p < PlayerCount; p++) spawnTransforms[p] = tagStart.transform;
             }
 
-            if(ballStart == null)
+            // 공 위치 먼저 세팅 (카메라 워프 대비). initialSpawn 도 같이 기록해서 OOB 시 BallStart 로 복귀 가능.
+            for(int p = 0; p < PlayerCount; p++)
             {
-                Debug.LogError($"Hole {CurrentHole} has no BallStart.");
-                return;
+                if(balls[p] != null && spawnTransforms[p] != null)
+                {
+                    balls[p].SetInitialSpawn(spawnTransforms[p].position);
+                    balls[p].SetPosition(spawnTransforms[p].position);
+                }
             }
 
-            // 공 위치 먼저 세팅 (OnLoadHole → CameraController.OnLoadHole 에서 공 위치로 카메라 워프하기 때문).
-            // 이렇게 하면 홀이 지하에 있어도 카메라는 처음부터 새 홀 위치를 바라봄.
-            Ball.Instance.SetPosition(ballStart.transform.position);
+            // BallStart 마커는 전부 숨김.
+            foreach(var s in starts) s.gameObject.SetActive(false);
 
-            // 마커 전부 숨김 (쓰지 않은 다른 플레이어의 start 도 안 보이게)
-            if(starts.Length > 0)
-                foreach(var s in starts) s.gameObject.SetActive(false);
-            else
-                ballStart.SetActive(false);
+            // 턴: 매 홀마다 1P 가 먼저.
+            if(CurrentPlayer != 0)
+            {
+                CurrentPlayer = 0;
+                OnPlayerChanged?.Invoke(CurrentPlayer);
+            }
+            Ball.SetActive(balls[0]);
 
-            // 두트윈 인트로 연출: 홀을 지하로 밀어내리고, 공은 잠시 숨겨둠. 코루틴이 뿅 올라오는 애니메이션 담당.
-            // ballStart 는 hole 의 자식 → hole 이 올라오면 ballStart 의 world 위치도 원래대로 복귀.
+            // 인트로 연출: 홀을 지하로, 공 숨김 → 팝인.
             if(holeIntroPopUp)
             {
-                Ball.Instance.gameObject.SetActive(false);
+                for(int p = 0; p < PlayerCount; p++)
+                {
+                    if(balls[p] != null) balls[p].gameObject.SetActive(false);
+                }
                 float originalY = CurrentHoleObject.transform.position.y;
                 CurrentHoleObject.transform.position += Vector3.down * holeIntroPopDepth;
-                // ballStart Transform 을 전달 → 애니메이션 종료 후 그 시점의 world 좌표로 공 재배치.
-                StartCoroutine(HoleIntroAnimation(originalY, ballStart.transform));
+                StartCoroutine(HoleIntroAnimation(originalY, spawnTransforms));
             }
         }
 
-        // Menu 씬의 GameStart 팝업 패턴과 동일 느낌: OutBack 이징으로 Y 복귀 → 공 활성화 → 카메라 잠시 정지.
-        IEnumerator HoleIntroAnimation(float targetY, Transform ballStartTransform)
+        // 홀 인트로: 코스가 지하에서 올라온 뒤 양쪽 공 모두 팝인. 활성 공만 조준 settle, 카메라 팔로우는 활성 공 기준.
+        IEnumerator HoleIntroAnimation(float targetY, Transform[] ballStartTransforms)
         {
-            // 코스 전체가 DOMoveY 로 지하→본래 위치
             if(CurrentHoleObject != null)
                 yield return CurrentHoleObject.transform
                     .DOMoveY(targetY, holeIntroPopDuration)
@@ -204,21 +307,22 @@ namespace MiniGolf
             if(holeIntroBallSpawnDelay > 0f)
                 yield return new WaitForSeconds(holeIntroBallSpawnDelay);
 
-            // 공 활성화 → SetPosition 으로 Rigidbody/Transform 재동기화 (비활성 상태에서 설정한 position 이
-            // 재활성 시 어긋나는 경우 대비. Menu 의 SpawnBallAt 과 동일 순서).
-            // 이후 Menu 코인과 동일 패턴의 scale 팝인 + 조준 블록 (settle).
-            if(Ball.Instance != null)
+            // 모든 플레이어의 공 활성화 + 팝인 애니메이션.
+            for(int p = 0; p < PlayerCount; p++)
             {
-                Ball.Instance.gameObject.SetActive(true);
-                if(ballStartTransform != null)
-                    Ball.Instance.SetPosition(ballStartTransform.position);
-                Ball.Instance.StartSpawnSettle(holeIntroBallSettleDuration);
-                Ball.Instance.PlaySpawnPopIn();
+                if(balls[p] == null) continue;
+                balls[p].gameObject.SetActive(true);
+                if(ballStartTransforms != null && p < ballStartTransforms.Length && ballStartTransforms[p] != null)
+                {
+                    balls[p].SetInitialSpawn(ballStartTransforms[p].position);
+                    balls[p].SetPosition(ballStartTransforms[p].position);
+                }
+                balls[p].StartSpawnSettle(holeIntroBallSettleDuration);
+                balls[p].PlaySpawnPopIn();
             }
+            // 활성 공 재지정 (팝인 직후 kinematic 상태 갱신).
+            Ball.SetActive(balls[CurrentPlayer]);
 
-            // 카메라 팔로우 잠금 → 공 pop-in 이 끝나는 타이밍에 정확히 풀리도록.
-            // Ball 의 SpawnPopDuration 과 일치시켜 "공이 원래 크기 되면 바로 카메라 잡기" 를 구현.
-            // Ball.Instance 없거나 pop 지속시간 0이면 인스펙터의 fallback 값 사용.
             var camCtrl = FindAnyObjectByType<CameraController>();
             if(camCtrl != null)
             {
@@ -229,42 +333,94 @@ namespace MiniGolf
             }
         }
 
-        public void BallSinked()
+        // 특정 공이 홀에 들어갔을 때 Hole.cs 가 호출.
+        public void BallSinked(Ball ball)
         {
-            BallInHole = true;
+            if(ball == null) return;
+            int p = ball.PlayerIndex;
+            if(p < 0 || p >= PlayerCount) return;
+            if(sunkPerPlayer != null && sunkPerPlayer[p]) return;  // 중복 방지
+
+            if(sunkPerPlayer != null) sunkPerPlayer[p] = true;
+            ball.MarkSunk();
             OnBallSunk?.Invoke();
-            StartCoroutine(PostBallSink());
-        }
 
-        IEnumerator PostBallSink()
-        {
-            yield return new WaitForSeconds(2.0f);
-
-            // 2P이고 아직 현재 홀을 플레이하지 않은 플레이어가 있으면 전환
-            if(CurrentPlayer < PlayerCount - 1)
+            // 모든 플레이어가 홀인 → 다음 홀. 아니면 남은 플레이어로 턴 전환.
+            if(AllPlayersSunk())
             {
-                CurrentPlayer++;
-                OnPlayerChanged?.Invoke(CurrentPlayer);
-                // 같은 홀을 다음 플레이어를 위해 리셋
-                ScreenFade.Instance.BeginTransition(() =>
-                {
-                    BallInHole = false;
-                    SpawnHole();
-                });
+                BallInHole = true;
+                StartCoroutine(AdvanceAfterAllSunk());
             }
             else
             {
-                // 모든 플레이어가 현재 홀 완료 → 다음 홀 또는 메뉴로
-                CurrentPlayer = 0;
-                if(CurrentHole < CurrentCourse.Holes.Length)
-                    ScreenFade.Instance.BeginTransition(() => LoadHole(CurrentHole + 1));
-                else
-                    ScreenFade.Instance.BeginTransition(() => UnityEngine.SceneManagement.SceneManager.LoadScene("Menu"));
+                // 남은 플레이어로 턴 전환 (공 멈추는 이벤트 기다리지 않고 바로).
+                StartCoroutine(SwitchTurnCoroutine(fromSink: true));
             }
         }
 
-        void OnBallHit()
+        bool AllPlayersSunk()
         {
+            if(sunkPerPlayer == null) return false;
+            for(int i = 0; i < sunkPerPlayer.Length; i++)
+                if(!sunkPerPlayer[i]) return false;
+            return true;
+        }
+
+        IEnumerator AdvanceAfterAllSunk()
+        {
+            yield return new WaitForSeconds(2.0f);
+            if(CurrentHole < CurrentCourse.Holes.Length)
+                ScreenFade.Instance.BeginTransition(() => {
+                    BallInHole = false;
+                    LoadHole(CurrentHole + 1);
+                });
+            else
+                ScreenFade.Instance.BeginTransition(() => UnityEngine.SceneManagement.SceneManager.LoadScene("Menu"));
+        }
+
+        // 어느 공이든 멈추면 호출. 현재 턴 플레이어 공이면 상대 턴으로 전환.
+        void OnAnyBallBeginWaiting(Ball ball)
+        {
+            if(balls == null || PlayerCount <= 1) return;
+            if(ball.PlayerIndex != CurrentPlayer) return;
+            if(sunkPerPlayer != null && sunkPerPlayer[CurrentPlayer]) return;
+            if(BallInHole) return;
+            if(turnSwitching) return;
+
+            StartCoroutine(SwitchTurnCoroutine(fromSink: false));
+        }
+
+        IEnumerator SwitchTurnCoroutine(bool fromSink)
+        {
+            turnSwitching = true;
+            // 시각적 버퍼 (홀인 이펙트 또는 공 멈춤 직후 짧게 대기).
+            yield return new WaitForSeconds(fromSink ? 1.5f : turnSwitchDelay);
+
+            // 다음 남은 (아직 홀인 하지 않은) 플레이어 찾기.
+            int next = CurrentPlayer;
+            for(int offset = 1; offset <= PlayerCount; offset++)
+            {
+                int candidate = (CurrentPlayer + offset) % PlayerCount;
+                if(sunkPerPlayer == null || !sunkPerPlayer[candidate])
+                {
+                    next = candidate;
+                    break;
+                }
+            }
+
+            if(next != CurrentPlayer)
+            {
+                CurrentPlayer = next;
+                Ball.SetActive(balls[CurrentPlayer]);
+                OnPlayerChanged?.Invoke(CurrentPlayer);
+            }
+            turnSwitching = false;
+        }
+
+        // 어느 공이든 치면 호출. 현재 턴 플레이어만 stroke 카운트 증가.
+        void OnAnyBallHit(Ball ball)
+        {
+            if(ball.PlayerIndex != CurrentPlayer) return;
             CurrentStroke++;
         }
     }

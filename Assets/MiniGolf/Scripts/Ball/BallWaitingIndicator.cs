@@ -32,12 +32,23 @@ namespace MiniGolf
             // Ball 이 비활성인 동안에는 BallTracker 가 위치 갱신을 멈춰 이전 위치에 고정되므로 반드시 숨겨야 함.
             bool ballActive = ball != null && ball.gameObject.activeInHierarchy;
 
+            // 2P 멀티볼: 자기 턴인 (활성) 공에서만 대기 인디케이터 표시.
+            // Ball.Instance 는 현재 턴 플레이어의 공. 상대 공은 kinematic 으로 정지해 있지만 인디케이터는 안 띄움.
+            bool isActiveBall = (ball != null && Ball.Instance == ball);
+            // 턴 전환 대기 중(공 멈추고 다음 플레이어로 넘기는 0.6s 시점)엔 인디케이터도 숨김.
+            bool turnSwitching = GameManager.Instance != null && GameManager.Instance.IsTurnSwitching;
+            // CurState == Waiting 일 때만 표시. PreWait (공 멈추고 0.2s 버퍼) 나 Moving 에서는 숨김.
+            // 이전에는 IsMoving (velocity 기반) 만 체크해서 PreWait 에서도 인디케이터가 깜빡임.
+            bool stateIsWaiting = ball != null && ball.CurState == Ball.State.Waiting;
+
             bool shouldShow = ball != null
                               && ballActive             // 공 비활성이면 숨김 (홀 전환/코스 로드 중)
+                              && isActiveBall           // 내 턴이 아닌 공은 숨김
+                              && stateIsWaiting         // Waiting 상태에서만 표시 (PreWait 숨김)
+                              && !turnSwitching          // 턴 전환 대기 중 숨김
                               && !inHole
                               && !ball.IsSpawning       // 팝인 중이면 숨김 (홀 전환 직후 깜빡임 방지)
                               && !ball.IsAwaitingRespawn // OOB 리스폰 대기 중이면 숨김
-                              && !ball.IsMoving
                               && !ball.IsSettling
                               && InputController.Instance != null
                               && !InputController.Instance.IsInteractingWithBall;

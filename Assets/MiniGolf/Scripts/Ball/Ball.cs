@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.Collections;
 using DG.Tweening;
@@ -8,6 +9,16 @@ namespace MiniGolf
     [RequireComponent(typeof(Rigidbody))]
     public class Ball : MonoBehaviour, IBlastImmune
     {
+        // 2P 모드에서 어느 플레이어의 공인지 (0=1P, 1=2P). GameManager 가 세팅.
+        public int PlayerIndex { get; set; }
+
+        // 씬에 존재하는 모든 Ball 인스턴스. 멀티볼(2P) 지원.
+        public static readonly List<Ball> All = new List<Ball>();
+
+        // 어느 공이든 칠 때마다 발행 (HUD stroke 카운트, 파티클 등에서 사용).
+        public static event System.Action<Ball> OnAnyHit;
+        // 어느 공이든 Waiting 상태 진입 시 (공이 멈춤) 발행. GameManager 턴 스위치에서 사용.
+        public static event System.Action<Ball> OnAnyBeginWaiting;
         public enum State
         {
             Waiting,
@@ -104,14 +115,25 @@ namespace MiniGolf
         [Tooltip("느리게 굴러갈 때 적용할 추가 선형 감속 (높을수록 빨리 멈춤)")]
         [SerializeField][Range(0f, 20f)] private float slowStopDrag = 4f;
         private Vector3 lastWaitingPosition;
-        // 마지막으로 샷을 친 시점의 공 위치 (OOB 리스폰용)
+        // 마지막으로 샷을 친 시점의 공 위치 (OOB 리스폰용, 1P 기본)
         private Vector3 lastShotPosition;
+        // 홀 로드 시 설정되는 초기 BallStart 위치. 2P 모드에서 OOB 시 여기로 리스폰.
+        private Vector3 initialSpawnPosition;
+
+        // 외부(GameManager) 가 홀 스폰 시 호출해서 초기 스폰 위치 기록.
+        public void SetInitialSpawn(Vector3 position)
+        {
+            initialSpawnPosition = position;
+        }
         // OOB 리스폰 코루틴 핸들 (취소용)
         private Coroutine respawnCoroutine;
         // 벽 충돌음 연속 재생 방지용
         private float lastWallHitTime = -10f;
         // 첫 샷 전엔 OOB 효과음 재생 안 함 (스폰 시 OOB 트리거 오발화 방지)
         private bool hasBeenHit;
+        // 현재 진행 중인 스트로크 플래그. Hit 시 true, Waiting 도달 시 false → 턴 전환 트리거.
+        // 홀 로드/리셋으로 생기는 Waiting 상태에서는 턴 전환이 오발동되지 않도록 사용.
+        private bool strokeInProgress;
         // 같은 OOB 진입 동안 효과음 1회만 재생. SetPosition(리스폰)에서 false로 리셋.
         private bool outOfBoundsFxPlayed;
         public State CurState { get; private set; }
@@ -124,15 +146,62 @@ namespace MiniGolf
         public event System.Action OnBeginMoving;
         public event System.Action OnBeginWaiting;
 
-        public static Ball Instance;
+        // 현재 턴/활성 공. 여러 공이 있어도 Instance 는 조준/입력을 받는 "활성" 공 하나만 가리킴.
+        // GameManager.SetActiveBall 로 턴 전환 시 교체됨. 싱글 플레이 씬에서는 항상 유일한 공.
+        public static Ball Instance { get; private set; }
 
         void Awake()
         {
-            Instance = this;
+            if(!All.Contains(this)) All.Add(this);
+            // 처음 등장한 공이 기본 활성. GameManager 가 나중에 SetActive 로 덮어씀.
+            if(Instance == null) Instance = this;
 
             // Get components.
             rig = GetComponent<Rigidbody>();
             trailRenderer = GetComponent<TrailRenderer>();
+        }
+
+        void OnDestroy()
+        {
+            All.Remove(this);
+            if(Instance == this)
+                Instance = All.Count > 0 ? All[0] : null;
+        }
+
+        // 활성 공 전환. 비활성 공은 kinematic 으로 고정 (제자리 유지, 입력/물리 차단).
+        // 활성 공은 kinematic 해제 → 정상 물리.
+        public static void SetActive(Ball ball)
+        {
+            if(Instance == ball) return;
+
+            // 이전 활성 공 비활성화
+            if(Instance != null && Instance != ball)
+            {
+                var prevRig = Instance.rig;
+                if(prevRig != null)
+                {
+                    prevRig.linearVelocity = Vector3.zero;
+                    prevRig.angularVelocity = Vector3.zero;
+                    prevRig.isKinematic = true;
+                }
+            }
+
+            Instance = ball;
+
+            if(ball != null && ball.rig != null && ball.CurState != State.Sunk)
+            {
+                ball.rig.isKinematic = false;
+            }
+        }
+
+        // 2P 공 머터리얼 교체용. "Model" 자식의 MeshRenderer 에만 적용 (그림자/조준 표식 등은 건드리지 않음).
+        public void SetBodyMaterial(Material mat)
+        {
+            if(mat == null) return;
+            Transform model = transform.Find("Model");
+            if(model == null) return;
+            var mr = model.GetComponent<MeshRenderer>();
+            if(mr != null) mr.material = mat;
         }
 
         void Start()
@@ -142,7 +211,8 @@ namespace MiniGolf
             InputController.Instance.OnBallTouchUp += OnBallTouchUp;
             if(GameManager.Instance != null)
             {
-                GameManager.Instance.OnBallSunk += OnBallSunk;
+                // NOTE: 2P 멀티볼 전환으로 OnBallSunk(공통 이벤트) 대신 GameManager 가
+                // 직접 MarkSunk(ball) 을 호출해서 특정 공만 Sunk 처리. 여기서는 OnLoadHole 만 구독.
                 GameManager.Instance.OnLoadHole += OnLoadHole;
             }
             else
@@ -161,7 +231,14 @@ namespace MiniGolf
 
         void OnBallTouchDown()
         {
+            // 활성 공만 입력 처리 (2P 멀티볼).
+            if(this != Instance) return;
+
             if(GameManager.Instance != null && GameManager.Instance.BallInHole)
+                return;
+
+            // 2P: 턴 전환 대기 중이면 입력 차단 (공 멈추고 상대 턴 넘어가기 전 "연속 더블샷" 방지).
+            if(GameManager.Instance != null && GameManager.Instance.IsTurnSwitching)
                 return;
 
             if(CurState != State.Waiting)
@@ -175,11 +252,23 @@ namespace MiniGolf
 
         void OnBallTouchUp()
         {
+            // 활성 공만 입력 처리.
+            if(this != Instance) return;
+
             if(!IsAiming)
                 return;
 
             if(GameManager.Instance != null && GameManager.Instance.BallInHole)
                 return;
+
+            // 턴 전환 대기 중엔 슛 발사도 차단 (시작은 됐어도 터치 업 시점에 턴 스위치 들어가면 취소).
+            if(GameManager.Instance != null && GameManager.Instance.IsTurnSwitching)
+            {
+                IsAiming = false;
+                CurrentAimDirection = Vector3.zero;
+                CurrentPowerPercent = 0f;
+                return;
+            }
 
             IsAiming = false;
             Hit(CurrentAimDirection * CurrentPowerPercent * maxHitForce);
@@ -189,6 +278,9 @@ namespace MiniGolf
 
         void Update()
         {
+            // 활성 공만 조준 계산 (비활성 공은 IsAiming 이 false 라 어차피 영향 없지만 안전하게 가드).
+            if(this != Instance) return;
+
             if(!IsAiming)
                 return;
 
@@ -263,6 +355,15 @@ namespace MiniGolf
                 CheckIfOutOfBounds();
                 lastWaitingPosition = transform.position;
                 OnBeginWaiting?.Invoke();
+                // 실제 스트로크 후 "진짜로 멈춘" 경우에만 정적 이벤트 발행 (GameManager 턴 전환 트리거).
+                // PreWait→Waiting 은 0.2s 시간 기반이라 공이 trajectory apex 를 지날 때 잠깐 속도 낮았다가
+                // 다시 가속되는 경우에도 Waiting 진입이 일어남. 이때 IsMoving 이 true 면 아직 비행 중이므로
+                // 턴 전환을 보류하고, 진짜 정지 시점(다음 Moving→Waiting 사이클)에 다시 기회 생김.
+                if(strokeInProgress && !IsMoving)
+                {
+                    strokeInProgress = false;
+                    OnAnyBeginWaiting?.Invoke(this);
+                }
             }
             else if(CurState == State.PreWait)
             {
@@ -282,7 +383,9 @@ namespace MiniGolf
             hasBeenHit = true;
 
             rig.AddForce(hitForce, ForceMode.VelocityChange);
+            strokeInProgress = true;
             OnHit?.Invoke();
+            OnAnyHit?.Invoke(this);
 
             float powerRatio = maxHitForce > 0 ? hitForce.magnitude / maxHitForce : 0;
             bool isStrongHit = powerRatio >= strongHitPowerThreshold;
@@ -304,6 +407,11 @@ namespace MiniGolf
         // Reset the ball's position if we are off the course.
         void CheckIfOutOfBounds()
         {
+            // 공이 여전히 움직이는 중이면 무시. PreWait→Waiting 이 시간 기반이라 ballistic apex 에서
+            // 공이 공중에서 코스 밖 위를 지나가면 raycast 가 OOB plane 을 맞아 오진입된 적 있음.
+            // 실제로 공이 OOB 위에 놓일 때는 OnCollisionEnter 로 따로 리스폰 예약되므로 이 체크는 "정지 후" 에만 쓰면 충분.
+            if(IsMoving) return;
+
             Ray ray = new Ray(transform.position, Vector3.down);
             RaycastHit hit;
 
@@ -312,7 +420,11 @@ namespace MiniGolf
                 if(hit.collider && hit.collider.CompareTag("OutOfBounds"))
                 {
                     PlayOutOfBoundsFeedback(transform.position);
-                    SetPosition(lastWaitingPosition);
+                    // 2P 모드: 항상 초기 BallStart 로 리스폰. 1P: 기존대로 마지막 waiting 위치.
+                    Vector3 target = (GameManager.Instance != null && GameManager.Instance.PlayerCount >= 2)
+                        ? initialSpawnPosition
+                        : lastWaitingPosition;
+                    SetPosition(target);
                     return;
                 }
             }
@@ -389,7 +501,11 @@ namespace MiniGolf
         void OnCollisionExit(Collision collision)
         {
             if(collision.collider != null && collision.collider.CompareTag("OutOfBounds"))
-                CancelRespawn();
+            {
+                // 2P: OOB 진입하면 무조건 리스폰. Exit 으로 취소하지 않음 (공이 OOB 트리거 관통해서 빠져나가도 리스폰 확정).
+                if(GameManager.Instance == null || GameManager.Instance.PlayerCount < 2)
+                    CancelRespawn();
+            }
         }
 
         void OnTriggerEnter(Collider other)
@@ -401,7 +517,11 @@ namespace MiniGolf
         void OnTriggerExit(Collider other)
         {
             if(other != null && other.CompareTag("OutOfBounds"))
-                CancelRespawn();
+            {
+                // 2P: 취소하지 않음. OOB 트리거를 관통해 빠져나가도 확정 리스폰.
+                if(GameManager.Instance == null || GameManager.Instance.PlayerCount < 2)
+                    CancelRespawn();
+            }
         }
 
         void TryScheduleRespawn(Vector3 fxPosition)
@@ -425,10 +545,13 @@ namespace MiniGolf
         IEnumerator RespawnAfterDelay()
         {
             yield return new WaitForSeconds(outOfBoundsRespawnDelay);
-            // 타이머 끝난 시점에 실제로 아직 OOB 위에 있는지 재확인.
+            // 1초 후 여전히 OOB 위(또는 월드 밖)에 있을 때만 리스폰. 공이 벽 스치고 다시 코스 안으로 돌아왔으면 skip.
             if(IsCurrentlyOverOutOfBounds())
             {
-                SetPosition(lastShotPosition);
+                // 2P 모드: 초기 BallStart 위치. 1P 모드: 기존대로 마지막 샷 위치.
+                bool is2P = GameManager.Instance != null && GameManager.Instance.PlayerCount >= 2;
+                Vector3 target = is2P ? initialSpawnPosition : lastShotPosition;
+                SetPosition(target);
             }
             respawnCoroutine = null;
         }
@@ -499,14 +622,26 @@ namespace MiniGolf
                 });
         }
 
-        void OnBallSunk()
+        // GameManager.BallSinked 가 특정 공에 대해 호출. 해당 공만 Sunk 상태로 들어감 (멀티볼 대응).
+        public void MarkSunk()
         {
+            if(CurState == State.Sunk) return;
             SetState(State.Sunk);
-            ballAudioSource.PlayOneShot(sinkSFX);
+            if(ballAudioSource != null && sinkSFX != null)
+                ballAudioSource.PlayOneShot(sinkSFX);
+            if(rig != null)
+            {
+                rig.linearVelocity = Vector3.zero;
+                rig.angularVelocity = Vector3.zero;
+                rig.isKinematic = true;
+            }
         }
 
         void OnLoadHole(CourseData course, int hole)
         {
+            // 다음 홀로 넘어갈 때 이전 홀의 스트로크 플래그 잔존 방지.
+            strokeInProgress = false;
+            hasBeenHit = false;
             SetState(State.Waiting);
         }
 

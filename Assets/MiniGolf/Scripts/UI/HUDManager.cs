@@ -37,8 +37,14 @@ namespace MiniGolf
 
         void Start()
         {
-            Ball.Instance.OnHit += UpdateStrokeText;
+            // 2P 멀티볼 대응: 특정 인스턴스의 OnHit 대신 정적 OnAnyHit 구독. 어느 공이든 치면 업데이트.
+            Ball.OnAnyHit += OnAnyBallHit;
             UpdatePlayerText();
+        }
+
+        void OnAnyBallHit(Ball ball)
+        {
+            UpdateStrokeText();
         }
 
         void OnLoadHole(CourseData courseData, int hole)
@@ -57,7 +63,21 @@ namespace MiniGolf
 
         void UpdateStrokeText()
         {
-            strokeText.text = $"Stroke {GameManager.Instance.CurrentStroke}";
+            var gm = GameManager.Instance;
+            if(gm == null || strokeText == null) return;
+
+            // 2P 모드: 줄바꿈으로 1P/2P 스트로크 각각 표시.
+            if(gm.PlayerCount >= 2 && gm.Strokes != null && gm.Strokes.Length >= 2 && gm.CurrentHole >= 1)
+            {
+                int h = gm.CurrentHole - 1;
+                int s1 = (gm.Strokes[0] != null && h < gm.Strokes[0].Length) ? gm.Strokes[0][h] : 0;
+                int s2 = (gm.Strokes[1] != null && h < gm.Strokes[1].Length) ? gm.Strokes[1][h] : 0;
+                strokeText.text = $"Stroke 1P {s1}\nStroke 2P {s2}";
+            }
+            else
+            {
+                strokeText.text = $"Stroke {gm.CurrentStroke}";
+            }
         }
 
         void UpdatePlayerText()

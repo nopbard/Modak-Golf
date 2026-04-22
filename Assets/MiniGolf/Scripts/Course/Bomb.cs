@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace MiniGolf
@@ -38,7 +39,15 @@ namespace MiniGolf
         [Tooltip("폭발 후 이펙트 오브젝트 자동 제거 시간(초)")]
         [SerializeField] private float effectLifetime = 3f;
 
+        [Tooltip("폭발 후 리스폰(재등장)까지 대기 시간(초). 0 이하면 리스폰 안 함(영구 파괴).")]
+        [SerializeField] private float respawnDelay = 2f;
+
+        [Tooltip("리스폰 시 scale 0→원본 팝인 애니메이션 지속 (초). 0 이면 즉시 표시.")]
+        [SerializeField] private float respawnPopDuration = 0.35f;
+
         private bool exploded;
+        private Vector3 originalScale;
+        private Coroutine respawnCo;
 
         // 공이 직접 충돌했을 때 (Rigidbody Collider)
         void OnCollisionEnter(Collision collision)
@@ -107,15 +116,55 @@ namespace MiniGolf
                     rb.linearVelocity = rb.linearVelocity.normalized * blastVelocityClamp;
             }
 
-            // 폭탄 메시 즉시 숨기기, 오브젝트는 effectLifetime 후 제거
-            foreach(var r in GetComponentsInChildren<Renderer>())
-                r.enabled = false;
+            // 폭탄 메시/콜라이더 숨김 (중복 폭발 방지)
+            SetVisualsEnabled(false);
 
-            // 콜라이더도 끄기 (중복 폭발 방지)
-            foreach(var c in GetComponentsInChildren<Collider>())
-                c.enabled = false;
+            // respawnDelay 양수 → 해당 시간 뒤 리스폰. 0 이하 → 기존 동작대로 제거.
+            if(respawnDelay > 0f)
+            {
+                respawnCo = StartCoroutine(RespawnAfterDelay());
+            }
+            else
+            {
+                Destroy(gameObject, effectLifetime);
+            }
+        }
 
-            Destroy(gameObject, effectLifetime);
+        void SetVisualsEnabled(bool enabled)
+        {
+            foreach(var r in GetComponentsInChildren<Renderer>(true))
+                r.enabled = enabled;
+            foreach(var c in GetComponentsInChildren<Collider>(true))
+                c.enabled = enabled;
+        }
+
+        IEnumerator RespawnAfterDelay()
+        {
+            // 원본 스케일 기억 (첫 실행 시만).
+            if(originalScale == Vector3.zero) originalScale = transform.localScale;
+
+            yield return new WaitForSeconds(respawnDelay);
+
+            // 리스폰: 플래그 리셋 + 시각/콜라이더 복구 + 팝인.
+            exploded = false;
+            SetVisualsEnabled(true);
+
+            if(respawnPopDuration > 0f)
+            {
+                transform.localScale = Vector3.zero;
+                float t = 0f;
+                while(t < respawnPopDuration)
+                {
+                    t += Time.deltaTime;
+                    float k = Mathf.Clamp01(t / respawnPopDuration);
+                    // OutBack 느낌 easing
+                    float eased = 1f - Mathf.Pow(1f - k, 3f);
+                    transform.localScale = originalScale * eased;
+                    yield return null;
+                }
+                transform.localScale = originalScale;
+            }
+            respawnCo = null;
         }
 
 #if UNITY_EDITOR

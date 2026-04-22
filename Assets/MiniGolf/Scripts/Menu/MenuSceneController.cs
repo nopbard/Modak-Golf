@@ -218,6 +218,9 @@ namespace MiniGolf
             playerCount = Mathf.Clamp(playerCount, 1, 2);
             PlayerPrefs.SetInt("PlayerCount", playerCount);
             PlayerPrefs.SetInt("CourseToPlay", courseIndex);
+            // Menu 경유 플래그. GameManager.Start 가 이걸 읽어서 PlayerPrefs 를 사용할지,
+            // 아니면 인스펙터의 editorDefault 값을 사용할지 결정.
+            GameManager.CameFromMenu = true;
 
             string sceneName = (courseList != null && courseIndex >= 0 && courseIndex < courseList.Courses.Length)
                 ? courseList.Courses[courseIndex].GameScene

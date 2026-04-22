@@ -11,12 +11,16 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52bdc8c240ab242499cbe6032e52bd07, type: 3}
   m_Name: HardCourse
-  m_EditorClassIdentifier: 
-  DisplayName: Hard Course
+  m_EditorClassIdentifier:
+  DisplayName: Hard Course (2P)
   Difficulty: 2
   Holes:
-  - Par: 1
-    HolePrefab: {fileID: 3514501570942771561, guid: 70511bc4cd3d9254ca8eff0cb2c9929f, type: 3}
-  - Par: 1
-    HolePrefab: {fileID: 2234846270872846206, guid: df960bb7d0a838a49b60254c2b7f6c2d, type: 3}
+  - Par: 2
+    HolePrefab: {fileID: 5194588490507158453, guid: 70e98e80ea3de4ba88f5b4b8d955bd11, type: 3}
+  - Par: 2
+    HolePrefab: {fileID: 5194588490507158453, guid: 346d9485c2c71405eb4955f4e6ee1641, type: 3}
+  - Par: 3
+    HolePrefab: {fileID: 5194588490507158453, guid: 1f80c44ac7cd3433aaf0c8df39cd8383, type: 3}
+  - Par: 4
+    HolePrefab: {fileID: 5194588490507158453, guid: 6db53f8d72793490b8af5cead44d881f, type: 3}
   GameScene: Game_Arcade

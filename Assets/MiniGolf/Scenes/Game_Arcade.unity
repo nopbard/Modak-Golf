@@ -742,6 +742,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2608781134753063313, guid: 427366f18bdf4c34a8e155a69e57196d, type: 3}
+      propertyPath: ballPrefab
+      value: 
+      objectReference: {fileID: 5630886133674654660, guid: de17e3739f8842d46941b1cca47fc3fd, type: 3}
+    - target: {fileID: 2608781134753063313, guid: 427366f18bdf4c34a8e155a69e57196d, type: 3}
+      propertyPath: ball2PMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: c061b665ecf33477aa2fc17df5e556f3, type: 2}
+    - target: {fileID: 2608781134753063313, guid: 427366f18bdf4c34a8e155a69e57196d, type: 3}
+      propertyPath: editorDefaultCourseIndex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2608781134753063313, guid: 427366f18bdf4c34a8e155a69e57196d, type: 3}
+      propertyPath: editorDefaultPlayerCount
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3356682190364683871, guid: 427366f18bdf4c34a8e155a69e57196d, type: 3}
       propertyPath: m_Name
       value: _GameManager
